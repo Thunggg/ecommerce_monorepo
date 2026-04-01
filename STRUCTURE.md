@@ -8,6 +8,12 @@
 ```text
 ecomerce/
   backend/                 # NestJS API (Nx project: @org/backend)
+    prisma/
+      schema.prisma
+      migrations/
+        20260401110838_init/
+          migration.sql
+        migration_lock.toml
     src/
       app/
         app.controller.ts
@@ -17,6 +23,10 @@ ecomerce/
         app.service.spec.ts
       assets/
       main.ts              # API bootstrap (global prefix: /api, PORT defaults to 3000)
+    .env                   # Local env (should NOT be committed)
+    .gitignore
+    prisma.config.ts
+    Dockerfile             # Present (currently empty)
     eslint.config.mjs
     jest.config.cts
     package.json
@@ -31,6 +41,7 @@ ecomerce/
     tsconfig.json
 
   frontend/                # Next.js app (Nx project: @org/frontend)
+    .next/                 # Next build output (gitignored)
     public/
     specs/
     src/
@@ -103,3 +114,39 @@ pnpm nx e2e @org/frontend-e2e
 pnpm nx show projects
 pnpm nx show project @org/backend --json
 pnpm nx show project @org/frontend --json
+
+# Khởi động tất cả services
+
+docker-compose up
+
+# Khởi động ở chế độ background
+
+docker-compose up -d
+
+# Xem logs của tất cả services
+
+docker-compose logs
+
+# Xem logs của riêng backend
+
+docker-compose logs backend
+
+# Dừng tất cả
+
+docker-compose down
+
+# Dừng và xóa cả volume (mất dữ liệu DB)
+
+docker-compose down -v
+
+# Rebuild và chạy lại
+
+docker-compose up --build
+
+# Chạy một service cụ thể
+
+docker-compose up backend
+
+# Chạy migration riêng (nếu cần)
+
+docker-compose run --rm migrate
