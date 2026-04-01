@@ -1,2 +1,6 @@
 packages:
   - 'packages/*'
+  - 'backend'
+  - 'backend-e2e'
+  - 'frontend'
+  - 'frontend-e2e'
