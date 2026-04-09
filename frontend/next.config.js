@@ -11,6 +11,18 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  rewrites: async () => {
+    const target = process.env.API_PROXY_TARGET;
+    if (!target) {
+      throw new Error('API_PROXY_TARGET is not set');
+    }
+    return [
+      {
+        source: '/backend-api/:path*',
+        destination: `${target}/:path*`,
+      },
+    ];
+  },
 };
 
 const plugins = [

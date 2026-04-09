@@ -88,6 +88,8 @@ ecomerce/
 - `@org/frontend`
 - `@org/frontend-e2e`
 
+##################################
+
 ## Chạy dev
 
 pnpm nx serve @org/backend
@@ -114,6 +116,8 @@ pnpm nx e2e @org/frontend-e2e
 pnpm nx show projects
 pnpm nx show project @org/backend --json
 pnpm nx show project @org/frontend --json
+
+##################################
 
 # Khởi động tất cả services
 
@@ -149,4 +153,17 @@ docker-compose up backend
 
 # Chạy migration riêng (nếu cần)
 
-docker-compose run --rm migrate
+## docker-compose run --rm migrate
+
+##################################
+Quy trình chuẩn
+pnpm nx serve @org/backend
+pnpm nx dev @org/frontend
+
+pnpm nx lint @org/backend @org/frontend
+pnpm nx test @org/backend @org/frontend
+pnpm nx build @org/backend
+pnpm nx build @org/frontend
+git status
+
+docker compose up -d --build
