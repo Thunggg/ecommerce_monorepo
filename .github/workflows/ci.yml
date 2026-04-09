@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      API_PROXY_TARGET: http://localhost:3000/api
+      API_PROXY_TARGET: ${{ secrets.API_PROXY_TARGET }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 25
     needs: checks
     env:
-      API_PROXY_TARGET: http://localhost:3000/api
+      API_PROXY_TARGET: ${{ secrets.API_PROXY_TARGET }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,6 +83,7 @@ jobs:
     needs: checks
     env:
       DB_PASSWORD: ci_dummy_password
+      API_PROXY_TARGET: ${{ secrets.API_PROXY_TARGET }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -110,5 +111,7 @@ jobs:
           context: .
           file: ./frontend/Dockerfile
           push: false
+          build-args: |
+            API_PROXY_TARGET=${{ env.API_PROXY_TARGET }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

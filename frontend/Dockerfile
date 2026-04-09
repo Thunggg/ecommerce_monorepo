@@ -15,6 +15,8 @@ COPY frontend ./frontend
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm nx sync
+ARG API_PROXY_TARGET
+ENV API_PROXY_TARGET=$API_PROXY_TARGET
 RUN pnpm nx build @org/frontend
 
 # Runtime stage
