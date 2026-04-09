@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   contents: read
@@ -31,16 +35,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Nx Cloud optional: keep if your workspace is connected
-      - run: pnpm nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e"
+      - name: Set NX base/head
+        run: |
+          git fetch --no-tags --prune --depth=1 origin main
+          echo "NX_BASE=origin/main" >> "$GITHUB_ENV"
+          echo "NX_HEAD=HEAD" >> "$GITHUB_ENV"
 
-      - run: pnpm nx record -- pnpm nx format:check --base="remotes/origin/main"
-      - run: pnpm nx run-many -t lint test build typecheck
+      - run: pnpm nx affected -t lint,typecheck,test,build --base="$NX_BASE" --head="$NX_HEAD" --parallel=3
 
       - run: pnpm nx fix-ci
         if: always()
 
   e2e:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: checks
@@ -61,5 +68,47 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Run e2e separately to avoid long run-many hangs
-      - run: pnpm nx run-many -t e2e --parallel=1
+      - name: Set NX base/head
+        run: |
+          git fetch --no-tags --prune --depth=1 origin main
+          echo "NX_BASE=origin/main" >> "$GITHUB_ENV"
+          echo "NX_HEAD=HEAD" >> "$GITHUB_ENV"
+
+      # Run e2e separately to avoid long CI hangs
+      - run: pnpm nx affected -t e2e --base="$NX_BASE" --head="$NX_HEAD" --parallel=1
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: checks
+    env:
+      DB_PASSWORD: ci_dummy_password
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - name: Validate docker compose file
+        run: docker compose config
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image (cached)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          target: runtime
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image (cached)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./frontend/Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
