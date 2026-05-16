@@ -35,4 +35,4 @@ jobs:
         run: pnpm install --frozen-lockfile
       
       - name: Lint, test, build
-        run: pnpm run-many -t lint test build typecheck
+        run: pnpm nx run-many -t lint test build typecheck
