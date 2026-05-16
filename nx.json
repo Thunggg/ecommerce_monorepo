@@ -18,9 +18,7 @@
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
+        "typecheck": { "targetName": "typecheck" },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -40,17 +38,10 @@
         "serveStaticTargetName": "serve-static"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
     {
       "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
+      "options": { "targetName": "test" },
       "exclude": ["backend-e2e/**/*"]
     },
     {
@@ -64,21 +55,11 @@
         "watchDepsTargetName": "watch-deps"
       }
     },
-    {
-      "plugin": "@nx/playwright/plugin",
-      "options": {
-        "targetName": "e2e"
-      }
-    }
+    { "plugin": "@nx/playwright/plugin", "options": { "targetName": "e2e" } }
   ],
-  "nxCloudId": "6a072c6500af028facb21ac3",
+  "nxCloudId": "6a08560a4f53ac06e37d6f88",
   "analytics": true,
   "generators": {
-    "@nx/next": {
-      "application": {
-        "style": "tailwind",
-        "linter": "eslint"
-      }
-    }
+    "@nx/next": { "application": { "style": "tailwind", "linter": "eslint" } }
   }
 }
