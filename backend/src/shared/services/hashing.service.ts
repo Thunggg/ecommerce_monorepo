@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 
 export class HashingService {
   private readonly SALT_ROUNDS = 10
