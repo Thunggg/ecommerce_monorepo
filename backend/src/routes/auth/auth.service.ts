@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common'
+import { ConflictException, Injectable, UnprocessableEntityException } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import { RegisterBodyType, SendOTPBodyType, VerifyCationCodeType } from './auth.model'
