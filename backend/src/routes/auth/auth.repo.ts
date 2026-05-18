@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../shared/services/prisma.service'
-import { UserType } from './auth.model'
+import { UserType, VerifyCationCodeType } from './auth.model'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 
 @Injectable()
@@ -19,18 +19,50 @@ export class AuthRepository {
     })
   }
 
-  async findUniqueVerificationCode(uniqueValue: { email: string; code: string; type: TypeOfVerificationCode }) {
-    return await this.prisma.verificationCode.findUnique({
+  async findVerificationCode(value: Pick<VerifyCationCodeType, 'email' | 'type' | 'code'>) {
+    return await this.prisma.verificationCode.findFirst({
+      where: {
+        email: value.email,
+        type: value.type,
+        code: value.code,
+      },
+    })
+  }
+
+  async deleteVerifycationCode(uniqueValue: { email: string; type: TypeOfVerificationCode }) {
+    return await this.prisma.verificationCode.delete({
       where: {
         email_type: uniqueValue,
       },
     })
   }
 
-  async deleteVerifycationCode(uniqueValue: { email: string; code: string; type: TypeOfVerificationCode }) {
-    return await this.prisma.verificationCode.delete({
+  async findUserByUniqueValue(uniqueValue: { email: string } | { id: number }): Promise<UserType | null> {
+    return this.prisma.user.findUnique({
+      where: uniqueValue,
+    })
+  }
+
+  async createVerifycationCode(
+    body: Pick<VerifyCationCodeType, 'email' | 'code' | 'type' | 'expiresAt'>,
+  ): Promise<VerifyCationCodeType> {
+    return await this.prisma.verificationCode.upsert({
       where: {
-        email_type: uniqueValue,
+        email_type: {
+          email: body.email,
+          type: body.type,
+        },
+      },
+      update: {
+        code: body.code,
+        expiresAt: body.expiresAt,
+      },
+      create: {
+        email: body.email,
+        code: body.code,
+        type: body.type,
+        expiresAt: body.expiresAt,
+        createdAt: new Date(),
       },
     })
   }

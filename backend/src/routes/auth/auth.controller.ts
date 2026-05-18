@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common'
-import { RegisterDto, RegisterResponseDto } from './auth.dto'
+import { RegisterBodyDTO, RegisterResponseDto, SendOTPBodyDTO, SendOTPResponseDto } from './auth.dto'
 import { AuthService } from './auth.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 
@@ -9,7 +9,13 @@ export class AuthController {
 
   @Post('register')
   @ZodSerializerDto(RegisterResponseDto)
-  async register(@Body() body: RegisterDto) {
+  async register(@Body() body: RegisterBodyDTO) {
     return await this.authService.register(body)
+  }
+
+  @Post('otp')
+  @ZodSerializerDto(SendOTPResponseDto)
+  async sendOTP(@Body() body: SendOTPBodyDTO) {
+    return await this.authService.sendOTP(body)
   }
 }

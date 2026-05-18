@@ -60,9 +60,14 @@ export const SendOTPSchema = VerifyCationCodeSchema.pick({
   type: true,
 }).strict()
 
+// User Types
 export type UserType = z.infer<typeof UserSchema>
 
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 export type RegisterResType = z.infer<typeof RegisterResSchema>
 
+// Verification Code Types
 export type VerifyCationCodeType = z.infer<typeof VerifyCationCodeSchema>
+
+// Send OTP Types
+export type SendOTPBodyType = z.infer<typeof SendOTPSchema>
