@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { UserStatus } from '../../generated/prisma/enums'
+import { TypeOfVerificationCode, UserStatus } from '../../shared/constants/auth.constant'
 
 export const UserSchema = z.object({
   id: z.number(),
@@ -45,3 +45,24 @@ export const RegisterResSchema = UserSchema.omit({
   totpSecret: true,
   deletedById: true,
 })
+
+export const VerifyCationCodeSchema = z.object({
+  id: z.number(),
+  email: z.email(),
+  code: z.string(),
+  type: z.enum(TypeOfVerificationCode),
+  expiresAt: z.date(),
+  createdAt: z.date(),
+})
+
+export const SendOTPSchema = VerifyCationCodeSchema.pick({
+  email: true,
+  type: true,
+}).strict()
+
+export type UserType = z.infer<typeof UserSchema>
+
+export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
+export type RegisterResType = z.infer<typeof RegisterResSchema>
+
+export type VerifyCationCodeType = z.infer<typeof VerifyCationCodeSchema>
