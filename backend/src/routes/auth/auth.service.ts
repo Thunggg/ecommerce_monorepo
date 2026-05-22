@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, UnprocessableEntityException } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
-import { RegisterBodyType, SendOTPBodyType, VerifyCationCodeType } from './auth.model'
+import { LoginBodyType, RegisterBodyType, SendOTPBodyType, UserType, VerifyCationCodeType } from './auth.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 import { AuthRepository } from './auth.repo'
@@ -10,6 +10,8 @@ import { addMilliseconds } from 'date-fns'
 import { envConfig } from '../../shared/config/validate'
 import ms, { StringValue } from 'ms'
 import { EmailService } from '../../shared/services/email.service'
+import { AccessTokenPayloadCreate } from '../../shared/types/jwt.type'
+import { TokenService } from '../../shared/services/token.service'
 
 @Injectable()
 export class AuthService {
@@ -18,9 +20,10 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly authRepository: AuthRepository,
     private readonly emailService: EmailService,
+    private readonly tokenService: TokenService,
   ) {}
 
-  async register(body: RegisterBodyType) {
+  async register(body: RegisterBodyType): Promise<Omit<UserType, 'password' | 'totpSecret'>> {
     try {
       const { code, email, name, phoneNumber, password } = body
 
@@ -87,7 +90,9 @@ export class AuthService {
     return verifycationOTP
   }
 
-  async sendOTP(body: SendOTPBodyType) {
+  async sendOTP(body: SendOTPBodyType): Promise<{
+    message: string
+  }> {
     try {
       // Tìm user theo email
       const user = await this.authRepository.findUserByUniqueValue({ email: body.email })
@@ -122,8 +127,6 @@ export class AuthService {
       // Gửi email để xác thực
       const { error } = await this.emailService.sendOTP({ email: body.email, code: code })
 
-      console.log(error)
-
       if (error) {
         throw new UnprocessableEntityException({
           message: 'Failed to send OTP',
@@ -144,5 +147,94 @@ export class AuthService {
       }
       throw error
     }
+  }
+
+  async login(body: LoginBodyType & { userAgent: string; ipAddress: string }): Promise<{
+    accessToken: string
+    refreshToken: string
+  }> {
+    try {
+      const { email, password, userAgent, ipAddress } = body
+
+      // Tìm user theo email
+      const user = await this.authRepository.findUserIncludeRole({ email })
+
+      if (!user) {
+        throw new UnprocessableEntityException({
+          message: 'The email does not exist',
+          path: 'email',
+        })
+      }
+
+      // Kiểm tra mật khẩu
+      const isPasswordValid = await this.hashingService.verify(password, user.password)
+
+      if (!isPasswordValid) {
+        throw new UnprocessableEntityException({
+          message: 'The password is incorrect',
+          path: 'password',
+        })
+      }
+
+      // Tạo device
+
+      const device = await this.authRepository.createDevice({
+        userId: user.id,
+        userAgent: userAgent,
+        ip: ipAddress,
+        lastActive: new Date(),
+        isActive: true,
+      })
+
+      // Tạo refresh token và access token
+      const tokens = await this.generateToken({
+        userId: user.id,
+        roleId: user.roleId,
+        roleName: user.role.name,
+        deviceId: device.id,
+      })
+
+      return tokens
+    } catch (error) {
+      console.error(error)
+
+      if (error instanceof PrismaClientValidationError) {
+        throw new ConflictException('The field not be empty')
+      } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new UnprocessableEntityException('Email is not exist')
+      }
+      throw error
+    }
+  }
+
+  async generateToken(payload: AccessTokenPayloadCreate): Promise<{
+    accessToken: string
+    refreshToken: string
+  }> {
+    // Tạo accessToken và refreshToken
+    const [accessToken, refreshToken] = await Promise.all([
+      this.tokenService.signAccessToken({
+        userId: payload.userId,
+        deviceId: payload.deviceId,
+        roleId: payload.roleId,
+        roleName: payload.roleName,
+      }),
+      this.tokenService.signRefreshToken({
+        userId: payload.userId,
+      }),
+    ])
+
+    // Decoded refresh token để lưu vào DB
+    const decodedRefreshToken = await this.tokenService.verifyRefreshToken(refreshToken)
+
+    // lưu vào DB
+    await this.authRepository.createRefreshToken({
+      deviceId: payload.deviceId,
+      token: refreshToken,
+      userId: payload.userId,
+      expiresAt: new Date(decodedRefreshToken.exp * 1000),
+    })
+
+    return { accessToken, refreshToken }
   }
 }
