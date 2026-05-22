@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import {
@@ -10,6 +10,18 @@ import {
   UserType,
   VerifyCationCodeType,
 } from './auth.model'
+import {
+  EmailAlreadyExistsException,
+  EmailNotFoundException,
+  EmailRequiredException,
+  FailedToSendOTPException,
+  FieldNotEmptyException,
+  IncorrectPasswordException,
+  InvalidVerificationCodeException,
+  OTPExpiredException,
+  RefreshTokenRevokedException,
+  UniqueViolationException,
+} from './error.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 import { AuthRepository } from './auth.repo'
@@ -51,16 +63,16 @@ export class AuthService {
 
       // Hash và lấy client role id
       const [clientRoleId, hashedPassword] = await Promise.all([
-        await this.rolesService.getClientRoleId(),
-        await this.hashingService.hash(password),
+        this.rolesService.getClientRoleId(),
+        this.hashingService.hash(password),
       ])
 
       // Tạo user
       const [user] = await Promise.all([
         this.authRepository.createUser({
-          email: email,
-          name: name,
-          phoneNumber: phoneNumber,
+          email,
+          name,
+          phoneNumber,
           password: hashedPassword,
           roleId: clientRoleId,
         }),
@@ -69,14 +81,11 @@ export class AuthService {
 
       return user
     } catch (error: unknown) {
-      console.error(error)
-
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new UnprocessableEntityException('The email already exists')
+        throw UniqueViolationException
       } else if (error instanceof PrismaClientValidationError) {
-        throw new ConflictException('The field not be empty')
+        throw FieldNotEmptyException
       }
-
       throw error
     }
   }
@@ -93,76 +102,55 @@ export class AuthService {
     })
 
     if (!verifycationOTP) {
-      throw new UnprocessableEntityException({
-        message: 'The verification code is invalid',
-        path: 'code',
-      })
+      throw InvalidVerificationCodeException
     }
 
     if (verifycationOTP.expiresAt < new Date()) {
-      throw new UnprocessableEntityException({
-        message: 'The verification code has expired',
-        path: 'code',
-      })
+      throw OTPExpiredException
     }
 
     return verifycationOTP
   }
 
-  async sendOTP(body: SendOTPBodyType): Promise<{
-    message: string
-  }> {
+  async sendOTP(body: SendOTPBodyType): Promise<{ message: string }> {
     try {
       // Tìm user theo email
       const user = await this.authRepository.findUserByUniqueValue({ email: body.email })
 
       // Kiểm tra nếu user đã tồn tại và type là REGISTER
       if (body.type === TypeOfVerificationCode.REGISTER && user) {
-        throw new UnprocessableEntityException({
-          message: 'The email already exists',
-          path: 'email',
-        })
+        throw EmailAlreadyExistsException
       }
 
       // Kiểm tra nếu user không tồn tại và type là FORGOT_PASSWORD
       if (body.type === TypeOfVerificationCode.FORGOT_PASSWORD && !user) {
-        throw new UnprocessableEntityException({
-          message: 'The email does not exist',
-          path: 'email',
-        })
+        throw EmailNotFoundException
       }
 
       // Tạo mã OTP
       const code = generateOTP()
 
-      // Tạo verifycation code
+      // Tạo verification code
       await this.authRepository.createVerifycationCode({
         email: body.email,
-        code: code,
+        code,
         type: body.type,
         expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN as StringValue)),
       })
 
       // Gửi email để xác thực
-      const { error } = await this.emailService.sendOTP({ email: body.email, code: code })
+      const { error } = await this.emailService.sendOTP({ email: body.email, code })
 
       if (error) {
-        throw new UnprocessableEntityException({
-          message: 'Failed to send OTP',
-          path: 'email',
-        })
+        throw FailedToSendOTPException
       }
 
-      return {
-        message: 'OTP sent successfully',
-      }
+      return { message: 'OTP sent successfully' }
     } catch (error) {
-      console.error(error)
-
       if (error instanceof PrismaClientValidationError) {
-        throw new ConflictException('The field not be empty')
+        throw FieldNotEmptyException
       } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new UnprocessableEntityException('Email is not exist')
+        throw UniqueViolationException
       }
       throw error
     }
@@ -179,27 +167,20 @@ export class AuthService {
       const user = await this.authRepository.findUserIncludeRole({ email })
 
       if (!user) {
-        throw new UnprocessableEntityException({
-          message: 'The email does not exist',
-          path: 'email',
-        })
+        throw EmailNotFoundException
       }
 
       // Kiểm tra mật khẩu
       const isPasswordValid = await this.hashingService.verify(password, user.password)
 
       if (!isPasswordValid) {
-        throw new UnprocessableEntityException({
-          message: 'The password is incorrect',
-          path: 'password',
-        })
+        throw IncorrectPasswordException
       }
 
       // Tạo device
-
       const device = await this.authRepository.createDevice({
         userId: user.id,
-        userAgent: userAgent,
+        userAgent,
         ip: ipAddress,
         lastActive: new Date(),
         isActive: true,
@@ -215,12 +196,10 @@ export class AuthService {
 
       return tokens
     } catch (error) {
-      console.error(error)
-
       if (error instanceof PrismaClientValidationError) {
-        throw new ConflictException('The field not be empty')
+        throw FieldNotEmptyException
       } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new UnprocessableEntityException('Email is not exist')
+        throw UniqueViolationException
       }
       throw error
     }
@@ -231,13 +210,13 @@ export class AuthService {
       // Verify refresh token
       const { userId } = await this.tokenService.verifyRefreshToken(payload.token)
 
-      // kiểm tra refresh token có tồn tại trong DB hay ko
+      // Kiểm tra refresh token có tồn tại trong DB hay ko
       const refreshTokenIsInDB = await this.authRepository.findUniqueRefreshTokenIncludeUserRole({
         token: payload.token,
       })
 
       if (!refreshTokenIsInDB) {
-        throw new UnauthorizedException('Refreh token has been revoked')
+        throw RefreshTokenRevokedException
       }
 
       const {
@@ -248,38 +227,32 @@ export class AuthService {
         },
       } = refreshTokenIsInDB
 
-      // cập nhật device
-      // xóa refreshToken cũ
-      // tạo accessToken và refreshToken mới
+      // Cập nhật device, xóa refreshToken cũ, tạo accessToken và refreshToken mới
       const [, , tokens] = await Promise.all([
-        await this.authRepository.updateDevice(deviceId, {
+        this.authRepository.updateDevice(deviceId, {
           ip: payload.ipAddress,
           userAgent: payload.userAgent,
         }),
-        await this.authRepository.deleteRefreshToken({ token: payload.token }),
-        await this.generateToken({
-          userId,
-          deviceId,
-          roleId,
-          roleName,
-        }),
+        this.authRepository.deleteRefreshToken({ token: payload.token }),
+        this.generateToken({ userId, deviceId, roleId, roleName }),
       ])
 
       return tokens
     } catch (error: unknown) {
-      console.log(error)
-
       if (error instanceof PrismaClientValidationError) {
-        throw new ConflictException('The field not be empty')
+        throw FieldNotEmptyException
       } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new UnprocessableEntityException('Email is not exist')
+        throw UniqueViolationException
       }
       throw error
     }
   }
 
   async getAuthorizationUrl({ userAgent, ip }: GoogleAuthStateSchemaType) {
-    const scope = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+    const scope = [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ]
 
     const stateString = Buffer.from(JSON.stringify({ userAgent, ip })).toString('base64')
 
@@ -290,9 +263,7 @@ export class AuthService {
       state: stateString,
     })
 
-    return {
-      url,
-    }
+    return { url }
   }
 
   async googleCallback({ code, state }: { code: string; state: string }) {
@@ -300,11 +271,10 @@ export class AuthService {
       let userAgent = 'Unknown'
       let ip = 'Unknown'
 
-      // Lấy thông tin user
+      // Lấy thông tin client từ state
       try {
         if (state) {
           const clientInfo = JSON.parse(Buffer.from(state, 'base64').toString()) as GoogleAuthStateSchemaType
-
           userAgent = clientInfo.userAgent
           ip = clientInfo.ip
         }
@@ -312,28 +282,21 @@ export class AuthService {
         console.log(error)
       }
 
-      // Lấy token
+      // Lấy token từ Google
       const { tokens } = await this.oauth2Client.getToken(code)
-
       this.oauth2Client.setCredentials(tokens)
 
-      // lấy thông tin user
-      const oauth2 = google.oauth2({
-        version: 'v2',
-        auth: this.oauth2Client,
-      })
-
+      // Lấy thông tin user từ Google
+      const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client })
       const { data } = await oauth2.userinfo.get()
 
       if (!data.email) {
-        throw new Error('Email is required')
+        throw EmailRequiredException
       }
 
-      let user = await this.authRepository.findUserIncludeRole({
-        email: data.email,
-      })
+      let user = await this.authRepository.findUserIncludeRole({ email: data.email })
 
-      // nếu user ko tồn tại
+      // Nếu user không tồn tại thì tạo mới
       if (!user) {
         const clientRole = await this.rolesService.getClientRoleId()
         const randomPassword = uuidv4()
@@ -348,10 +311,11 @@ export class AuthService {
           avatar: data.picture ?? null,
         })
       }
+
       const device = await this.authRepository.createDevice({
         userId: user?.id as number,
-        userAgent: userAgent,
-        ip: ip,
+        userAgent,
+        ip,
       })
 
       const authTokens = await this.generateToken({
@@ -364,6 +328,7 @@ export class AuthService {
       return authTokens
     } catch (error) {
       console.log(error)
+      throw error
     }
   }
 
@@ -387,7 +352,7 @@ export class AuthService {
     // Decoded refresh token để lưu vào DB
     const decodedRefreshToken = await this.tokenService.verifyRefreshToken(refreshToken)
 
-    // lưu vào DB
+    // Lưu vào DB
     await this.authRepository.createRefreshToken({
       deviceId: payload.deviceId,
       token: refreshToken,

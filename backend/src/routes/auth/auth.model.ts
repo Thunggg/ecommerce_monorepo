@@ -8,14 +8,26 @@ import { TypeOfVerificationCode, UserStatus } from '../../shared/constants/auth.
 /** Bảng User */
 export const UserSchema = z.object({
   id: z.number(),
-  email: z.email(),
-  name: z.string().min(1).max(100),
-  password: z.string().min(6).max(100),
-  phoneNumber: z.string().min(9).max(15),
+  email: z
+    .string({ error: 'Error.EmailRequired' })
+    .min(1, 'Error.EmailRequired')
+    .email('Error.EmailInvalid'),
+  name: z
+    .string({ error: 'Error.FieldNotEmpty' })
+    .min(1, 'Error.FieldNotEmpty')
+    .max(100, 'Error.FieldTooLong'),
+  password: z
+    .string({ error: 'Error.FieldNotEmpty' })
+    .min(6, 'Error.PasswordTooShort')
+    .max(100, 'Error.FieldTooLong'),
+  phoneNumber: z
+    .string({ error: 'Error.FieldNotEmpty' })
+    .min(9, 'Error.PhoneNumberTooShort')
+    .max(15, 'Error.PhoneNumberTooLong'),
   avatar: z.string().nullable(),
   totpSecret: z.string().nullable(),
-  status: z.enum(UserStatus),
-  roleId: z.number().positive(),
+  status: z.enum(UserStatus, { error: 'Error.InvalidUserStatus' }),
+  roleId: z.number({ error: 'Error.FieldNotEmpty' }).positive('Error.InvalidRoleId'),
   createdById: z.number().nullable(),
   updatedById: z.number().nullable(),
   deletedById: z.number().nullable(),
@@ -50,7 +62,7 @@ export const DeviceSchema = z.object({
 
 /** Bảng RefreshToken — lưu refresh token đã cấp */
 export const RefreshTokenSchema = z.object({
-  token: z.string(),
+  token: z.string({ error: 'Error.FieldNotEmpty' }).min(1, 'Error.FieldNotEmpty'),
   userId: z.number(),
   deviceId: z.number(),
   expiresAt: z.date(),
@@ -60,9 +72,14 @@ export const RefreshTokenSchema = z.object({
 /** Bảng VerificationCode — OTP đăng ký / quên mật khẩu / … */
 export const VerifyCationCodeSchema = z.object({
   id: z.number(),
-  email: z.email(),
-  code: z.string(),
-  type: z.enum(TypeOfVerificationCode),
+  email: z
+    .string({ error: 'Error.EmailRequired' })
+    .min(1, 'Error.EmailRequired')
+    .email('Error.EmailInvalid'),
+  code: z
+    .string({ error: 'Error.FieldNotEmpty' })
+    .length(6, 'Error.InvalidVerificationCode'),
+  type: z.enum(TypeOfVerificationCode, { error: 'Error.InvalidVerificationType' }),
   expiresAt: z.date(),
   createdAt: z.date(),
 })
@@ -79,15 +96,20 @@ export const RegisterBodySchema = UserSchema.pick({
   phoneNumber: true,
 })
   .extend({
-    confirmPassword: z.string().min(6).max(100),
-    code: z.string().length(6),
+    confirmPassword: z
+      .string({ error: 'Error.FieldNotEmpty' })
+      .min(6, 'Error.PasswordTooShort')
+      .max(100, 'Error.FieldTooLong'),
+    code: z
+      .string({ error: 'Error.FieldNotEmpty' })
+      .length(6, 'Error.InvalidVerificationCode'),
   })
   .strict()
   .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Password and confirm password must match',
+        message: 'Error.PasswordNotMatch',
         path: ['confirmPassword'],
       })
     }
@@ -138,15 +160,16 @@ export const RefreshTokenBodySchema = RefreshTokenSchema.pick({
 }).strict()
 
 // =============================================================================
-// Google auth — POST /auth/refresh (hoặc route tương đương)
+// Google auth
 // =============================================================================
+
 export const GoogleAuthStateSchema = DeviceSchema.pick({
   userAgent: true,
   ip: true,
 })
 
 export const GetAuthorizationUrlResSchema = z.object({
-  url: z.url(),
+  url: z.url('Error.InvalidUrl'),
 })
 
 // =============================================================================

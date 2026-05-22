@@ -38,7 +38,7 @@ export class AuthController {
   @IsPublic()
   @ZodSerializerDto(LoginResponseDto)
   async login(
-    @Body() body: LoginBodyDTO & { userAgent: string; ipAddress: string },
+    @Body() body: LoginBodyDTO,
     @UserAgent() userAgent: string,
     @Ip() ipAddress: string,
   ) {
@@ -49,7 +49,7 @@ export class AuthController {
   @IsPublic()
   @ZodSerializerDto(LoginResponseDto)
   async refreshToken(
-    @Body() body: RefreshTokenDTO & { userAgent: string; ipAddress: string },
+    @Body() body: RefreshTokenDTO,
     @UserAgent() userAgent: string,
     @Ip() ipAddress: string,
   ) {
