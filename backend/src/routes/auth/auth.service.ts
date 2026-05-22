@@ -35,6 +35,7 @@ import { TokenService } from '../../shared/services/token.service'
 import { OAuth2Client } from 'google-auth-library'
 import { google } from 'googleapis'
 import { v4 as uuidv4 } from 'uuid'
+import { MessageResType } from '../../shared/models/response.model'
 
 @Injectable()
 export class AuthService {
@@ -112,7 +113,7 @@ export class AuthService {
     return verifycationOTP
   }
 
-  async sendOTP(body: SendOTPBodyType): Promise<{ message: string }> {
+  async sendOTP(body: SendOTPBodyType): Promise<MessageResType> {
     try {
       // Tìm user theo email
       const user = await this.authRepository.findUserByUniqueValue({ email: body.email })
@@ -249,10 +250,7 @@ export class AuthService {
   }
 
   async getAuthorizationUrl({ userAgent, ip }: GoogleAuthStateSchemaType) {
-    const scope = [
-      'https://www.googleapis.com/auth/userinfo.profile',
-      'https://www.googleapis.com/auth/userinfo.email',
-    ]
+    const scope = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
 
     const stateString = Buffer.from(JSON.stringify({ userAgent, ip })).toString('base64')
 
@@ -361,5 +359,26 @@ export class AuthService {
     })
 
     return { accessToken, refreshToken }
+  }
+
+  async logout(refreshToken: string): Promise<MessageResType> {
+    try {
+      await this.tokenService.verifyRefreshToken(refreshToken)
+
+      const deletedRefreshToken = await this.authRepository.deleteRefreshToken({ token: refreshToken })
+
+      await this.authRepository.updateDevice(deletedRefreshToken.deviceId, {
+        isActive: false,
+      })
+
+      return { message: 'logout successfully' }
+    } catch (error) {
+      if (error instanceof PrismaClientValidationError) {
+        throw FieldNotEmptyException
+      } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw UniqueViolationException
+      }
+      throw error
+    }
   }
 }

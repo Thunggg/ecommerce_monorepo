@@ -3,6 +3,7 @@ import {
   GetAuthorizationUrlResDTO,
   LoginBodyDTO,
   LoginResponseDto,
+  LogoutBodyDTO,
   RefreshTokenDTO,
   RegisterBodyDTO,
   RegisterResponseDto,
@@ -15,6 +16,7 @@ import { UserAgent } from '../../shared/decorators/user-agent.decorator'
 import { IsPublic } from '../../shared/decorators/auth.decorator'
 import type { Response } from 'express'
 import { envConfig } from '../../shared/config/validate'
+import { MessageResDTO } from '../../shared/dtos/response.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -37,22 +39,14 @@ export class AuthController {
   @Post('login')
   @IsPublic()
   @ZodSerializerDto(LoginResponseDto)
-  async login(
-    @Body() body: LoginBodyDTO,
-    @UserAgent() userAgent: string,
-    @Ip() ipAddress: string,
-  ) {
+  async login(@Body() body: LoginBodyDTO, @UserAgent() userAgent: string, @Ip() ipAddress: string) {
     return await this.authService.login({ ...body, userAgent, ipAddress })
   }
 
   @Post('refresh-token')
   @IsPublic()
   @ZodSerializerDto(LoginResponseDto)
-  async refreshToken(
-    @Body() body: RefreshTokenDTO,
-    @UserAgent() userAgent: string,
-    @Ip() ipAddress: string,
-  ) {
+  async refreshToken(@Body() body: RefreshTokenDTO, @UserAgent() userAgent: string, @Ip() ipAddress: string) {
     return await this.authService.refreshToken({ ...body, userAgent, ipAddress })
   }
 
@@ -76,5 +70,11 @@ export class AuthController {
       const message = error instanceof Error ? error.message : 'Has error when login with google!'
       return res.redirect(`${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?errorMessage=${message}`)
     }
+  }
+
+  @Post('logout')
+  @ZodSerializerDto(MessageResDTO)
+  async logout(@Body() body: LogoutBodyDTO) {
+    return this.authService.logout(body.refreshToken)
   }
 }

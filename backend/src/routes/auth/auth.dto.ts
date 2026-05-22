@@ -3,6 +3,7 @@ import {
   GetAuthorizationUrlResSchema,
   LoginBodySchema,
   LoginResSchema,
+  LogoutBodySchema,
   RefreshTokenBodySchema,
   RegisterBodySchema,
   RegisterResSchema,
@@ -27,3 +28,6 @@ export class RefreshTokenDTO extends createZodDto(RefreshTokenBodySchema) {}
 
 // Google auth
 export class GetAuthorizationUrlResDTO extends createZodDto(GetAuthorizationUrlResSchema) {}
+
+// Logout
+export class LogoutBodyDTO extends createZodDto(LogoutBodySchema) {}

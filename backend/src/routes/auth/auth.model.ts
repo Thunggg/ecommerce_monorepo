@@ -8,18 +8,9 @@ import { TypeOfVerificationCode, UserStatus } from '../../shared/constants/auth.
 /** Bảng User */
 export const UserSchema = z.object({
   id: z.number(),
-  email: z
-    .string({ error: 'Error.EmailRequired' })
-    .min(1, 'Error.EmailRequired')
-    .email('Error.EmailInvalid'),
-  name: z
-    .string({ error: 'Error.FieldNotEmpty' })
-    .min(1, 'Error.FieldNotEmpty')
-    .max(100, 'Error.FieldTooLong'),
-  password: z
-    .string({ error: 'Error.FieldNotEmpty' })
-    .min(6, 'Error.PasswordTooShort')
-    .max(100, 'Error.FieldTooLong'),
+  email: z.string({ error: 'Error.EmailRequired' }).min(1, 'Error.EmailRequired').email('Error.EmailInvalid'),
+  name: z.string({ error: 'Error.FieldNotEmpty' }).min(1, 'Error.FieldNotEmpty').max(100, 'Error.FieldTooLong'),
+  password: z.string({ error: 'Error.FieldNotEmpty' }).min(6, 'Error.PasswordTooShort').max(100, 'Error.FieldTooLong'),
   phoneNumber: z
     .string({ error: 'Error.FieldNotEmpty' })
     .min(9, 'Error.PhoneNumberTooShort')
@@ -72,13 +63,8 @@ export const RefreshTokenSchema = z.object({
 /** Bảng VerificationCode — OTP đăng ký / quên mật khẩu / … */
 export const VerifyCationCodeSchema = z.object({
   id: z.number(),
-  email: z
-    .string({ error: 'Error.EmailRequired' })
-    .min(1, 'Error.EmailRequired')
-    .email('Error.EmailInvalid'),
-  code: z
-    .string({ error: 'Error.FieldNotEmpty' })
-    .length(6, 'Error.InvalidVerificationCode'),
+  email: z.string({ error: 'Error.EmailRequired' }).min(1, 'Error.EmailRequired').email('Error.EmailInvalid'),
+  code: z.string({ error: 'Error.FieldNotEmpty' }).length(6, 'Error.InvalidVerificationCode'),
   type: z.enum(TypeOfVerificationCode, { error: 'Error.InvalidVerificationType' }),
   expiresAt: z.date(),
   createdAt: z.date(),
@@ -100,9 +86,7 @@ export const RegisterBodySchema = UserSchema.pick({
       .string({ error: 'Error.FieldNotEmpty' })
       .min(6, 'Error.PasswordTooShort')
       .max(100, 'Error.FieldTooLong'),
-    code: z
-      .string({ error: 'Error.FieldNotEmpty' })
-      .length(6, 'Error.InvalidVerificationCode'),
+    code: z.string({ error: 'Error.FieldNotEmpty' }).length(6, 'Error.InvalidVerificationCode'),
   })
   .strict()
   .superRefine(({ password, confirmPassword }, ctx) => {
@@ -171,6 +155,15 @@ export const GoogleAuthStateSchema = DeviceSchema.pick({
 export const GetAuthorizationUrlResSchema = z.object({
   url: z.url('Error.InvalidUrl'),
 })
+
+// =============================================================================
+// Logout
+// =============================================================================
+export const LogoutBodySchema = z
+  .object({
+    refreshToken: z.string(),
+  })
+  .strict()
 
 // =============================================================================
 // Inferred types — dùng trong service / repository
