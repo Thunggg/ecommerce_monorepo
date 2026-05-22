@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 const envSchema = z.object({
   DATABASE_URL: z.string(),
-  SECRET_API_KEY: z.string(),
   ACCESS_TOKEN_EXPIRES_IN: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
