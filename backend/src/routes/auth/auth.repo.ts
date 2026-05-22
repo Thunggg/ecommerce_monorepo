@@ -19,6 +19,17 @@ export class AuthRepository {
     })
   }
 
+  async createUserIncludRole(
+    user: Pick<UserType, 'roleId' | 'email' | 'name' | 'password' | 'phoneNumber' | 'avatar'>,
+  ): Promise<(UserType & { role: RoleType }) | null> {
+    return await this.prisma.user.create({
+      data: user,
+      include: {
+        role: true,
+      },
+    })
+  }
+
   async findVerificationCode(value: Pick<VerifyCationCodeType, 'email' | 'type' | 'code'>) {
     return await this.prisma.verificationCode.findFirst({
       where: {

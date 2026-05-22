@@ -2,6 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException, UnprocessableEnti
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import {
+  GoogleAuthStateSchemaType,
   LoginBodyType,
   RefreshTokenBodySchemaType,
   RegisterBodyType,
@@ -19,16 +20,27 @@ import ms, { StringValue } from 'ms'
 import { EmailService } from '../../shared/services/email.service'
 import { AccessTokenPayloadCreate } from '../../shared/types/jwt.type'
 import { TokenService } from '../../shared/services/token.service'
+import { OAuth2Client } from 'google-auth-library'
+import { google } from 'googleapis'
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class AuthService {
+  private oauth2Client: OAuth2Client
+
   constructor(
     private readonly rolesService: RolesService,
     private readonly hashingService: HashingService,
     private readonly authRepository: AuthRepository,
     private readonly emailService: EmailService,
     private readonly tokenService: TokenService,
-  ) {}
+  ) {
+    this.oauth2Client = new google.auth.OAuth2({
+      client_id: envConfig.GOOGLE_CLIENT_ID,
+      clientSecret: envConfig.GOOGLE_CLIENT_SECRET,
+      redirect_uris: [envConfig.GOOGLE_REDIRECT_URI],
+    })
+  }
 
   async register(body: RegisterBodyType): Promise<Omit<UserType, 'password' | 'totpSecret'>> {
     try {
@@ -263,6 +275,95 @@ export class AuthService {
         throw new UnprocessableEntityException('Email is not exist')
       }
       throw error
+    }
+  }
+
+  async getAuthorizationUrl({ userAgent, ip }: GoogleAuthStateSchemaType) {
+    const scope = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+
+    const stateString = Buffer.from(JSON.stringify({ userAgent, ip })).toString('base64')
+
+    const url = this.oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope,
+      include_granted_scopes: true,
+      state: stateString,
+    })
+
+    return {
+      url,
+    }
+  }
+
+  async googleCallback({ code, state }: { code: string; state: string }) {
+    try {
+      let userAgent = 'Unknown'
+      let ip = 'Unknown'
+
+      // Lấy thông tin user
+      try {
+        if (state) {
+          const clientInfo = JSON.parse(Buffer.from(state, 'base64').toString()) as GoogleAuthStateSchemaType
+
+          userAgent = clientInfo.userAgent
+          ip = clientInfo.ip
+        }
+      } catch (error) {
+        console.log(error)
+      }
+
+      // Lấy token
+      const { tokens } = await this.oauth2Client.getToken(code)
+
+      this.oauth2Client.setCredentials(tokens)
+
+      // lấy thông tin user
+      const oauth2 = google.oauth2({
+        version: 'v2',
+        auth: this.oauth2Client,
+      })
+
+      const { data } = await oauth2.userinfo.get()
+
+      if (!data.email) {
+        throw new Error('Email is required')
+      }
+
+      let user = await this.authRepository.findUserIncludeRole({
+        email: data.email,
+      })
+
+      // nếu user ko tồn tại
+      if (!user) {
+        const clientRole = await this.rolesService.getClientRoleId()
+        const randomPassword = uuidv4()
+        const hashedPassword = await this.hashingService.hash(randomPassword.toString())
+
+        user = await this.authRepository.createUserIncludRole({
+          email: data.email,
+          name: data.name ?? '',
+          phoneNumber: '',
+          roleId: clientRole,
+          password: hashedPassword,
+          avatar: data.picture ?? null,
+        })
+      }
+      const device = await this.authRepository.createDevice({
+        userId: user?.id as number,
+        userAgent: userAgent,
+        ip: ip,
+      })
+
+      const authTokens = await this.generateToken({
+        userId: user?.id as number,
+        roleId: user?.roleId as number,
+        roleName: user?.role.name as string,
+        deviceId: device.id,
+      })
+
+      return authTokens
+    } catch (error) {
+      console.log(error)
     }
   }
 

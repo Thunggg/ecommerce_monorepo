@@ -138,6 +138,18 @@ export const RefreshTokenBodySchema = RefreshTokenSchema.pick({
 }).strict()
 
 // =============================================================================
+// Google auth — POST /auth/refresh (hoặc route tương đương)
+// =============================================================================
+export const GoogleAuthStateSchema = DeviceSchema.pick({
+  userAgent: true,
+  ip: true,
+})
+
+export const GetAuthorizationUrlResSchema = z.object({
+  url: z.url(),
+})
+
+// =============================================================================
 // Inferred types — dùng trong service / repository
 // =============================================================================
 
@@ -160,3 +172,6 @@ export type LoginBodyType = z.infer<typeof LoginBodySchema>
 
 // Refresh token
 export type RefreshTokenBodySchemaType = z.infer<typeof RefreshTokenBodySchema>
+
+// Google auth
+export type GoogleAuthStateSchemaType = z.infer<typeof GoogleAuthStateSchema>

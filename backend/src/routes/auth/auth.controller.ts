@@ -1,5 +1,6 @@
-import { Body, Controller, Ip, Post } from '@nestjs/common'
+import { Body, Controller, Get, Ip, Post, Query, Res } from '@nestjs/common'
 import {
+  GetAuthorizationUrlResDTO,
   LoginBodyDTO,
   LoginResponseDto,
   RefreshTokenDTO,
@@ -12,6 +13,8 @@ import { AuthService } from './auth.service'
 import { ZodSerializerDto } from 'nestjs-zod'
 import { UserAgent } from '../../shared/decorators/user-agent.decorator'
 import { IsPublic } from '../../shared/decorators/auth.decorator'
+import type { Response } from 'express'
+import { envConfig } from '../../shared/config/validate'
 
 @Controller('auth')
 export class AuthController {
@@ -51,5 +54,27 @@ export class AuthController {
     @Ip() ipAddress: string,
   ) {
     return await this.authService.refreshToken({ ...body, userAgent, ipAddress })
+  }
+
+  @Get('google-link')
+  @IsPublic()
+  @ZodSerializerDto(GetAuthorizationUrlResDTO)
+  async getGoogleLink(@UserAgent() userAgent: string, @Ip() ip: string) {
+    return this.authService.getAuthorizationUrl({ userAgent, ip })
+  }
+
+  @Get('google/callback')
+  @IsPublic()
+  async googleCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+    try {
+      const data = await this.authService.googleCallback({ code, state })
+
+      return res.redirect(
+        `${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?accessToken=${data?.accessToken}&refreshToken=${data?.refreshToken}`,
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Has error when login with google!'
+      return res.redirect(`${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?errorMessage=${message}`)
+    }
   }
 }
