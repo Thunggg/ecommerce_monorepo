@@ -93,4 +93,34 @@ export class AuthRepository {
       data: body,
     })
   }
+
+  async findUniqueRefreshTokenIncludeUserRole(uniqueValue: {
+    token: string
+  }): Promise<(RefreshTokenType & { user: UserType & { role: RoleType } }) | null> {
+    return await this.prisma.refreshToken.findUnique({
+      where: uniqueValue,
+      include: {
+        user: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    })
+  }
+
+  async updateDevice(deviceId: number, data: Partial<DeviceType>) {
+    return await this.prisma.device.update({
+      where: {
+        id: deviceId,
+      },
+      data,
+    })
+  }
+
+  async deleteRefreshToken(uniqueValue: { token: string }): Promise<RefreshTokenType> {
+    return await this.prisma.refreshToken.delete({
+      where: uniqueValue,
+    })
+  }
 }

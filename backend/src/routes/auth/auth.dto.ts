@@ -1,5 +1,12 @@
 import { createZodDto } from 'nestjs-zod'
-import { LoginBodySchema, LoginResSchema, RegisterBodySchema, RegisterResSchema, SendOTPSchema } from './auth.model'
+import {
+  LoginBodySchema,
+  LoginResSchema,
+  RefreshTokenBodySchema,
+  RegisterBodySchema,
+  RegisterResSchema,
+  SendOTPSchema,
+} from './auth.model'
 import { MessageResSchema } from '../../shared/models/response.model'
 
 // Register DTOs
@@ -13,3 +20,6 @@ export class SendOTPResponseDto extends createZodDto(MessageResSchema) {}
 // Login DTOs
 export class LoginBodyDTO extends createZodDto(LoginBodySchema) {}
 export class LoginResponseDto extends createZodDto(LoginResSchema) {}
+
+// Refresh Token DTOs
+export class RefreshTokenDTO extends createZodDto(RefreshTokenBodySchema) {}

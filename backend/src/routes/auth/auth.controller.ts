@@ -2,6 +2,7 @@ import { Body, Controller, Ip, Post } from '@nestjs/common'
 import {
   LoginBodyDTO,
   LoginResponseDto,
+  RefreshTokenDTO,
   RegisterBodyDTO,
   RegisterResponseDto,
   SendOTPBodyDTO,
@@ -35,5 +36,15 @@ export class AuthController {
     @Ip() ipAddress: string,
   ) {
     return await this.authService.login({ ...body, userAgent, ipAddress })
+  }
+
+  @Post('refresh-token')
+  @ZodSerializerDto(LoginResponseDto)
+  async refreshToken(
+    @Body() body: RefreshTokenDTO & { userAgent: string; ipAddress: string },
+    @UserAgent() userAgent: string,
+    @Ip() ipAddress: string,
+  ) {
+    return await this.authService.refreshToken({ ...body, userAgent, ipAddress })
   }
 }

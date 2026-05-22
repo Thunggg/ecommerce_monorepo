@@ -1,7 +1,14 @@
-import { ConflictException, Injectable, UnprocessableEntityException } from '@nestjs/common'
+import { ConflictException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
-import { LoginBodyType, RegisterBodyType, SendOTPBodyType, UserType, VerifyCationCodeType } from './auth.model'
+import {
+  LoginBodyType,
+  RefreshTokenBodySchemaType,
+  RegisterBodyType,
+  SendOTPBodyType,
+  UserType,
+  VerifyCationCodeType,
+} from './auth.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 import { AuthRepository } from './auth.repo'
@@ -197,6 +204,58 @@ export class AuthService {
       return tokens
     } catch (error) {
       console.error(error)
+
+      if (error instanceof PrismaClientValidationError) {
+        throw new ConflictException('The field not be empty')
+      } else if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new UnprocessableEntityException('Email is not exist')
+      }
+      throw error
+    }
+  }
+
+  async refreshToken(payload: RefreshTokenBodySchemaType & { userAgent: string; ipAddress: string }) {
+    try {
+      // Verify refresh token
+      const { userId } = await this.tokenService.verifyRefreshToken(payload.token)
+
+      // kiểm tra refresh token có tồn tại trong DB hay ko
+      const refreshTokenIsInDB = await this.authRepository.findUniqueRefreshTokenIncludeUserRole({
+        token: payload.token,
+      })
+
+      if (!refreshTokenIsInDB) {
+        throw new UnauthorizedException('Refreh token has been revoked')
+      }
+
+      const {
+        deviceId,
+        user: {
+          roleId,
+          role: { name: roleName },
+        },
+      } = refreshTokenIsInDB
+
+      // cập nhật device
+      // xóa refreshToken cũ
+      // tạo accessToken và refreshToken mới
+      const [, , tokens] = await Promise.all([
+        await this.authRepository.updateDevice(deviceId, {
+          ip: payload.ipAddress,
+          userAgent: payload.userAgent,
+        }),
+        await this.authRepository.deleteRefreshToken({ token: payload.token }),
+        await this.generateToken({
+          userId,
+          deviceId,
+          roleId,
+          roleName,
+        }),
+      ])
+
+      return tokens
+    } catch (error: unknown) {
+      console.log(error)
 
       if (error instanceof PrismaClientValidationError) {
         throw new ConflictException('The field not be empty')
