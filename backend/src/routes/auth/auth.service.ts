@@ -21,6 +21,7 @@ import {
   InvalidVerificationCodeException,
   OTPExpiredException,
   RefreshTokenRevokedException,
+  TOTPAlreadyEnableException,
   UniqueViolationException,
 } from './error.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
@@ -37,6 +38,8 @@ import { OAuth2Client } from 'google-auth-library'
 import { google } from 'googleapis'
 import { v4 as uuidv4 } from 'uuid'
 import { MessageResType } from '../../shared/models/response.model'
+import { TwoFactorAuthService } from '../../shared/services/2fa.service'
+import { ur } from 'zod/v4/locales'
 
 @Injectable()
 export class AuthService {
@@ -48,6 +51,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly emailService: EmailService,
     private readonly tokenService: TokenService,
+    private readonly twoFactorAuthService: TwoFactorAuthService,
   ) {
     this.oauth2Client = new google.auth.OAuth2({
       client_id: envConfig.GOOGLE_CLIENT_ID,
@@ -412,5 +416,36 @@ export class AuthService {
     }
 
     return verifycationOTP
+  }
+  async setupTwoFactorAuth(userId: number) {
+    // Lấy thông tin user và kiểm tra xem có tồn tại hay ko
+    const user = await this.authRepository.findUserByUniqueValue({
+      id: userId,
+    })
+
+    if (!user) {
+      throw EmailNotFoundException
+    }
+
+    // Kiểm tra xem đã bật 2FA chưa
+    if (user.totpSecret) {
+      throw TOTPAlreadyEnableException
+    }
+    // Tạo ra secret và uri
+    const { secret, uri } = this.twoFactorAuthService.generateTOTP(user.email)
+    // Cập nhật secret vào user trong database
+
+    await this.authRepository.updateUser(
+      { id: userId },
+      {
+        totpSecret: secret,
+      },
+    )
+    // Trả về secret và uri
+
+    return {
+      secret,
+      uri,
+    }
   }
 }

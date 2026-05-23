@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { AuthenticationGuard } from './guards/authentication.guard'
 import { AccessTokenGuard } from './guards/access-token.guard'
 import { APIKeyGuard } from './guards/api-key.guard'
+import { TwoFactorAuthService } from './services/2fa.service'
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { APIKeyGuard } from './guards/api-key.guard'
     TokenService,
     AccessTokenGuard,
     APIKeyGuard,
+    TwoFactorAuthService,
   ],
-  exports: [PrismaService, HashingService, EmailService, TokenService],
+  exports: [PrismaService, HashingService, EmailService, TokenService, TwoFactorAuthService],
 })
 export class SharedModule {}

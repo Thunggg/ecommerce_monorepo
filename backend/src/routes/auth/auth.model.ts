@@ -124,7 +124,12 @@ export const SendOTPSchema = VerifyCationCodeSchema.pick({
 export const LoginBodySchema = UserSchema.pick({
   email: true,
   password: true,
-}).strict()
+})
+  .extend({
+    totpCode: z.string().length(6).optional(), // 2FA
+    code: z.string().length(6).optional(), // OTP email
+  })
+  .strict()
 
 /** Response: cặp access + refresh token */
 export const LoginResSchema = z
@@ -187,6 +192,39 @@ export const ForgotPasswordBodySchema = z
   })
 
 // =============================================================================
+// Two factor
+// =============================================================================
+export const DisableTwoFactorBodySchema = z
+  .object({
+    totpCode: z.string().length(6).optional(),
+    code: z.string().length(6).optional(),
+  })
+  .strict()
+  .superRefine(({ code, totpCode }, ctx) => {
+    const errorMessage = 'Error.CodeOrTotpInvalid'
+
+    if ((code !== undefined) === (totpCode !== undefined)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: errorMessage,
+        path: ['totpCode'],
+      })
+      ctx.addIssue({
+        code: 'custom',
+        message: errorMessage,
+        path: ['code'],
+      })
+    }
+  })
+
+export const TwoFactorSetupResSchema = z
+  .object({
+    secret: z.string(),
+    uri: z.string(),
+  })
+  .strict()
+
+// =============================================================================
 // Inferred types — dùng trong service / repository
 // =============================================================================
 
@@ -215,3 +253,7 @@ export type GoogleAuthStateSchemaType = z.infer<typeof GoogleAuthStateSchema>
 
 // Forgot password
 export type ForgotPasswordBodySchemaType = z.infer<typeof ForgotPasswordBodySchema>
+
+// Two factor
+export type DisableTwoFactorBodySchemaType = z.infer<typeof DisableTwoFactorBodySchema>
+export type TwoFactorSetupResType = z.infer<typeof TwoFactorSetupResSchema>
