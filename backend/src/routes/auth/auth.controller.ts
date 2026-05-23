@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Ip, Post, Query, Res } from '@nestjs/common'
 import {
+  ForgotPasswordBodyDTO,
   GetAuthorizationUrlResDTO,
   LoginBodyDTO,
   LoginResponseDto,
@@ -76,5 +77,12 @@ export class AuthController {
   @ZodSerializerDto(MessageResDTO)
   async logout(@Body() body: LogoutBodyDTO) {
     return this.authService.logout(body.refreshToken)
+  }
+
+  @Post('forgot-password')
+  @IsPublic()
+  @ZodSerializerDto(MessageResDTO)
+  async forgotPassword(@Body() body: ForgotPasswordBodyDTO) {
+    return this.authService.forgotPassword(body)
   }
 }

@@ -134,4 +134,11 @@ export class AuthRepository {
       where: uniqueValue,
     })
   }
+
+  async updateUser(uniqueValue: { email: string } | { id: number }, data: Partial<Omit<UserType, 'id'>>) {
+    return await this.prisma.user.update({
+      where: uniqueValue,
+      data,
+    })
+  }
 }

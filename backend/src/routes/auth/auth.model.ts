@@ -8,7 +8,7 @@ import { TypeOfVerificationCode, UserStatus } from '../../shared/constants/auth.
 /** Bảng User */
 export const UserSchema = z.object({
   id: z.number(),
-  email: z.string({ error: 'Error.EmailRequired' }).min(1, 'Error.EmailRequired').email('Error.EmailInvalid'),
+  email: z.email('Error.EmailInvalid'),
   name: z.string({ error: 'Error.FieldNotEmpty' }).min(1, 'Error.FieldNotEmpty').max(100, 'Error.FieldTooLong'),
   password: z.string({ error: 'Error.FieldNotEmpty' }).min(6, 'Error.PasswordTooShort').max(100, 'Error.FieldTooLong'),
   phoneNumber: z
@@ -63,7 +63,7 @@ export const RefreshTokenSchema = z.object({
 /** Bảng VerificationCode — OTP đăng ký / quên mật khẩu / … */
 export const VerifyCationCodeSchema = z.object({
   id: z.number(),
-  email: z.string({ error: 'Error.EmailRequired' }).min(1, 'Error.EmailRequired').email('Error.EmailInvalid'),
+  email: z.email('Error.EmailInvalid'),
   code: z.string({ error: 'Error.FieldNotEmpty' }).length(6, 'Error.InvalidVerificationCode'),
   type: z.enum(TypeOfVerificationCode, { error: 'Error.InvalidVerificationType' }),
   expiresAt: z.date(),
@@ -92,7 +92,7 @@ export const RegisterBodySchema = UserSchema.pick({
   .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'Error.PasswordNotMatch',
         path: ['confirmPassword'],
       })
@@ -166,6 +166,27 @@ export const LogoutBodySchema = z
   .strict()
 
 // =============================================================================
+// Forgot password
+// =============================================================================
+export const ForgotPasswordBodySchema = z
+  .object({
+    email: z.email('Error.EmailInvalid'),
+    code: z.string().length(6),
+    newPassword: z.string().min(6).max(100),
+    confirmNewPassword: z.string().min(6).max(100),
+  })
+  .strict()
+  .superRefine(({ newPassword, confirmNewPassword }, ctx) => {
+    if (newPassword !== confirmNewPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Error.PasswordNotMatch',
+        path: ['confirmPassword'],
+      })
+    }
+  })
+
+// =============================================================================
 // Inferred types — dùng trong service / repository
 // =============================================================================
 
@@ -191,3 +212,6 @@ export type RefreshTokenBodySchemaType = z.infer<typeof RefreshTokenBodySchema>
 
 // Google auth
 export type GoogleAuthStateSchemaType = z.infer<typeof GoogleAuthStateSchema>
+
+// Forgot password
+export type ForgotPasswordBodySchemaType = z.infer<typeof ForgotPasswordBodySchema>

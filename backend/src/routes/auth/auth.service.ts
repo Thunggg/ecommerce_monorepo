@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import {
+  ForgotPasswordBodySchemaType,
   GoogleAuthStateSchemaType,
   LoginBodyType,
   RefreshTokenBodySchemaType,
@@ -89,28 +90,6 @@ export class AuthService {
       }
       throw error
     }
-  }
-
-  async validateVerificationCode(uniqueValue: {
-    email: string
-    code: string
-    type: TypeOfVerificationCode
-  }): Promise<VerifyCationCodeType> {
-    const verifycationOTP = await this.authRepository.findVerificationCode({
-      email: uniqueValue.email,
-      type: uniqueValue.type,
-      code: uniqueValue.code,
-    })
-
-    if (!verifycationOTP) {
-      throw InvalidVerificationCodeException
-    }
-
-    if (verifycationOTP.expiresAt < new Date()) {
-      throw OTPExpiredException
-    }
-
-    return verifycationOTP
   }
 
   async sendOTP(body: SendOTPBodyType): Promise<MessageResType> {
@@ -380,5 +359,58 @@ export class AuthService {
       }
       throw error
     }
+  }
+
+  async forgotPassword(payload: ForgotPasswordBodySchemaType): Promise<MessageResType> {
+    const { code, email, newPassword } = payload
+
+    // Kiểm tra xem user có tồn tại hay không
+    const user = await this.authRepository.findUserByUniqueValue({
+      email,
+    })
+
+    if (!user) {
+      throw EmailNotFoundException
+    }
+
+    // kiểm tra mã otp có hợp lệ hay không
+    await this.validateVerificationCode({
+      email,
+      code,
+      type: TypeOfVerificationCode.FORGOT_PASSWORD,
+    })
+
+    const passwordHashed = await this.hashingService.hash(newPassword)
+
+    await Promise.all([
+      this.authRepository.updateUser({ email }, { email: passwordHashed }),
+      this.authRepository.deleteVerifycationCode({ email, type: TypeOfVerificationCode.FORGOT_PASSWORD }),
+    ])
+
+    return {
+      message: 'Update password successfully',
+    }
+  }
+
+  async validateVerificationCode(uniqueValue: {
+    email: string
+    code: string
+    type: TypeOfVerificationCode
+  }): Promise<VerifyCationCodeType> {
+    const verifycationOTP = await this.authRepository.findVerificationCode({
+      email: uniqueValue.email,
+      type: uniqueValue.type,
+      code: uniqueValue.code,
+    })
+
+    if (!verifycationOTP) {
+      throw InvalidVerificationCodeException
+    }
+
+    if (verifycationOTP.expiresAt < new Date()) {
+      throw OTPExpiredException
+    }
+
+    return verifycationOTP
   }
 }
