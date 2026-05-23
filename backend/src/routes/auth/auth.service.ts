@@ -18,6 +18,8 @@ import {
   FailedToSendOTPException,
   FieldNotEmptyException,
   IncorrectPasswordException,
+  InvalidTOTPAndCodeException,
+  InvalidTOTPException,
   InvalidVerificationCodeException,
   OTPExpiredException,
   RefreshTokenRevokedException,
@@ -39,7 +41,6 @@ import { google } from 'googleapis'
 import { v4 as uuidv4 } from 'uuid'
 import { MessageResType } from '../../shared/models/response.model'
 import { TwoFactorAuthService } from '../../shared/services/2fa.service'
-import { ur } from 'zod/v4/locales'
 
 @Injectable()
 export class AuthService {
@@ -152,6 +153,30 @@ export class AuthService {
 
       if (!user) {
         throw EmailNotFoundException
+      }
+
+      // Kiểm tra xem có bật xác thực ko
+      if (user.totpSecret) {
+        if (!body.totpCode && !body.code) {
+          throw InvalidTOTPAndCodeException
+        }
+
+        if (body.totpCode) {
+          const isValid = this.twoFactorAuthService.verifyTOTP({
+            email: user.email,
+            token: body.totpCode,
+          })
+
+          if (!isValid) {
+            throw InvalidTOTPException
+          }
+        } else if (body.code) {
+          await this.validateVerificationCode({
+            email: user.email,
+            code: body.code,
+            type: TypeOfVerificationCode.LOGIN,
+          })
+        }
       }
 
       // Kiểm tra mật khẩu

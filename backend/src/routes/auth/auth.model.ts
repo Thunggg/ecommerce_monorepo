@@ -130,6 +130,22 @@ export const LoginBodySchema = UserSchema.pick({
     code: z.string().length(6).optional(), // OTP email
   })
   .strict()
+  .superRefine(({ totpCode, code }, ctx) => {
+    const errorMessage = 'Error.CodeOrTotpInvalid'
+
+    if (code !== undefined && totpCode !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: errorMessage,
+        path: ['totpCode'],
+      })
+      ctx.addIssue({
+        code: 'custom',
+        message: errorMessage,
+        path: ['code'],
+      })
+    }
+  })
 
 /** Response: cặp access + refresh token */
 export const LoginResSchema = z
