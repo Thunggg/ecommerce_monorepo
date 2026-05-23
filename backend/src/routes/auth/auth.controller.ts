@@ -97,7 +97,7 @@ export class AuthController {
   }
 
   @Post('2fa/disable')
-  @ZodSerializerDto(TwoFactorSetupResDTO)
+  @ZodSerializerDto(MessageResDTO)
   async disableTwoFactor(@Body() data: DisableTwoFactorBodyDTO, @ActiveUser('userId') userId: number) {
     return this.authService.disableTwoFactorAuth(data, userId)
   }
