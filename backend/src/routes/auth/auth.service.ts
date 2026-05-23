@@ -167,6 +167,7 @@ export class AuthService {
           const isValid = this.twoFactorAuthService.verifyTOTP({
             email: user.email,
             token: body.totpCode,
+            secret: user.totpSecret,
           })
 
           if (!isValid) {
@@ -414,7 +415,7 @@ export class AuthService {
     const passwordHashed = await this.hashingService.hash(newPassword)
 
     await Promise.all([
-      this.authRepository.updateUser({ email }, { email: passwordHashed }),
+      this.authRepository.updateUser({ email }, { password: passwordHashed }),
       this.authRepository.deleteVerifycationCode({ email, type: TypeOfVerificationCode.FORGOT_PASSWORD }),
     ])
 
@@ -498,6 +499,7 @@ export class AuthService {
       const isValid = this.twoFactorAuthService.verifyTOTP({
         email: user.email,
         token: totpCode,
+        secret: user.totpSecret,
       })
 
       if (!isValid) {

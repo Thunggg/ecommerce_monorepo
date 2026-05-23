@@ -91,14 +91,12 @@ export class AuthController {
   }
 
   @Post('2fa/setup')
-  @IsPublic()
   @ZodSerializerDto(TwoFactorSetupResDTO)
   async setupTwoFactor(@Body() _: EmptyBodyDTO, @ActiveUser('userId') userId: number) {
     return this.authService.setupTwoFactorAuth(userId)
   }
 
   @Post('2fa/disable')
-  @IsPublic()
   @ZodSerializerDto(TwoFactorSetupResDTO)
   async disableTwoFactor(@Body() data: DisableTwoFactorBodyDTO, @ActiveUser('userId') userId: number) {
     return this.authService.disableTwoFactorAuth(data, userId)
