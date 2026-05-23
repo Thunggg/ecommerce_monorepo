@@ -271,5 +271,5 @@ export type GoogleAuthStateSchemaType = z.infer<typeof GoogleAuthStateSchema>
 export type ForgotPasswordBodySchemaType = z.infer<typeof ForgotPasswordBodySchema>
 
 // Two factor
-export type DisableTwoFactorBodySchemaType = z.infer<typeof DisableTwoFactorBodySchema>
+export type DisableTwoFactorBodyType = z.infer<typeof DisableTwoFactorBodySchema>
 export type TwoFactorSetupResType = z.infer<typeof TwoFactorSetupResSchema>

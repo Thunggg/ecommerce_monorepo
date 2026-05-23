@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import {
+  DisableTwoFactorBodyType,
   ForgotPasswordBodySchemaType,
   GoogleAuthStateSchemaType,
   LoginBodyType,
@@ -24,6 +25,7 @@ import {
   OTPExpiredException,
   RefreshTokenRevokedException,
   TOTPAlreadyEnableException,
+  TOTPNotEnableException,
   UniqueViolationException,
 } from './error.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
@@ -471,6 +473,54 @@ export class AuthService {
     return {
       secret,
       uri,
+    }
+  }
+
+  async disableTwoFactorAuth(data: DisableTwoFactorBodyType, userId: number) {
+    const { code, totpCode } = data
+
+    // kiểm tra user có tồn tại hay ko
+    const user = await this.authRepository.findUserByUniqueValue({
+      id: userId,
+    })
+
+    if (!user) {
+      throw EmailNotFoundException
+    }
+
+    // kiểm tra xem user có bật totp code hay ko
+    if (!user.totpSecret) {
+      throw TOTPNotEnableException
+    }
+
+    // kiểm tra xem totp có hợp lệ hay ko
+    if (totpCode) {
+      const isValid = this.twoFactorAuthService.verifyTOTP({
+        email: user.email,
+        token: totpCode,
+      })
+
+      if (!isValid) {
+        throw InvalidTOTPException
+      }
+    }
+    // kiểm tra xem otp code có hợp lệ ko
+    else if (code) {
+      await this.validateVerificationCode({
+        email: user.email,
+        code,
+        type: TypeOfVerificationCode.DISABLE_2FA,
+      })
+    }
+    await this.authRepository.updateUser(
+      {
+        id: userId,
+      },
+      { totpSecret: null },
+    )
+
+    return {
+      message: 'Turn off 2FA success!',
     }
   }
 }
