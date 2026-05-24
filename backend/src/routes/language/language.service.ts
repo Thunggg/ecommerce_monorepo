@@ -4,7 +4,6 @@ import {
   LanguageAlreadyExistsException,
   LanguageNotFoundRecordException,
   LanguageValidationNotEmptyException,
-  NotFoundLanguageException,
 } from './error.model'
 import { CreateLanguageBodyType, UpdateLanguageBodyType } from './language.model'
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
@@ -26,7 +25,7 @@ export class LanguageService {
     const language = this.languageRepo.findById(id)
 
     if (!language) {
-      throw NotFoundLanguageException
+      throw LanguageNotFoundRecordException
     }
 
     return language
