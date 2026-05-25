@@ -27,19 +27,6 @@ export const UserSchema = z.object({
   updatedAt: z.date(),
 })
 
-/** Bảng Role */
-export const RoleSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  isActive: z.boolean(),
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
-  deletedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-})
-
 /** Bảng Device — phiên đăng nhập theo thiết bị */
 export const DeviceSchema = z.object({
   id: z.number(),
@@ -246,7 +233,6 @@ export const TwoFactorSetupResSchema = z
 
 // Entity
 export type UserType = z.infer<typeof UserSchema>
-export type RoleType = z.infer<typeof RoleSchema>
 export type DeviceType = z.infer<typeof DeviceSchema>
 export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>
 export type VerifyCationCodeType = z.infer<typeof VerifyCationCodeSchema>

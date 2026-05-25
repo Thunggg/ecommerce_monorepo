@@ -30,6 +30,7 @@ async function bootstrap() {
           name: method + ' ' + path,
         }
       }
+      return undefined
     })
     .filter((item: any) => item !== undefined)
 

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { RolesService } from './roles.service'
 import { HashingService } from '../../shared/services/hashing.service'
 import {
   DisableTwoFactorBodyType,
@@ -43,6 +42,7 @@ import { google } from 'googleapis'
 import { v4 as uuidv4 } from 'uuid'
 import { MessageResType } from '../../shared/models/response.model'
 import { TwoFactorAuthService } from '../../shared/services/2fa.service'
+import { RolesService } from '../role/roles.service'
 
 @Injectable()
 export class AuthService {
