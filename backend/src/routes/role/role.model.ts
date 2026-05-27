@@ -8,10 +8,10 @@ export const RoleSchema = z.object({
   description: z.string(),
   isActive: z.boolean(),
   deletedAt: z.date().nullable(),
-  deletedById: z.number(),
-  createdAt: z.date(),
+  deletedById: z.number().nullable(),
+  createdAt: z.date().nullable(),
   createdById: z.number().nullable(),
-  updatedAt: z.date(),
+  updatedAt: z.date().nullable(),
   updatedById: z.number().nullable(),
 })
 

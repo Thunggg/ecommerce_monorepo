@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { RoleName } from '../../shared/constants/role.constant'
 import {
   CreateRoleBodyType,
@@ -87,6 +87,10 @@ export class RolesService {
 
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
         throw RoleAlreadyExistException
+      }
+
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message)
       }
 
       throw error
