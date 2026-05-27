@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from '../app/app.module'
 import { PrismaService } from '../shared/services/prisma.service'
-import { HTTPMethod } from '../shared/constants/role.constant'
+import { HTTPMethod, RoleName } from '../shared/constants/role.constant'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -89,5 +89,31 @@ async function bootstrap() {
   if (!isUpdateOrDeletePermission) {
     console.log('No records need updating or deleting.')
   }
+
+  // Lấy lại permissions trong DB sau khi thêm mới hoặc bị xóa
+  const updatedPermissionInDb = await prisma.permission.findMany({
+    where: {
+      deletedAt: null,
+    },
+  })
+
+  // Cập nhật lại các permissions trong Admin
+  const adminRole = await prisma.role.findFirstOrThrow({
+    where: {
+      name: RoleName.ADMIN,
+      deletedAt: null,
+    },
+  })
+
+  await prisma.role.update({
+    where: {
+      id: adminRole.id,
+    },
+    data: {
+      permissions: {
+        set: updatedPermissionInDb.map((item) => ({ id: item.id })),
+      },
+    },
+  })
 }
 bootstrap()
