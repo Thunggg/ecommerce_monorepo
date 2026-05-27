@@ -7,11 +7,12 @@ export const RoleSchema = z.object({
   name: z.string(),
   description: z.string(),
   isActive: z.boolean(),
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
   deletedAt: z.date().nullable(),
+  deletedById: z.number(),
   createdAt: z.date(),
+  createdById: z.number().nullable(),
   updatedAt: z.date(),
+  updatedById: z.number().nullable(),
 })
 
 export const RoleWithPermissionsSchema = RoleSchema.extend({

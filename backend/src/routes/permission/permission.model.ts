@@ -12,6 +12,8 @@ export const PermissionSchema = z.object({
   updatedById: z.number().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  deletedById: z.number(),
+  deletedAt: z.date()
 })
 
 // 2. GetPermissions response & query
