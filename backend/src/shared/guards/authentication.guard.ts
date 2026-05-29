@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common'
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AUTH_TYPE_KEY, AuthMetadata } from '../decorators/auth.decorator'
 import { AuthType, AuthTypeType, ConditionGuard } from '../constants/auth.constant'
@@ -8,7 +8,7 @@ import { APIKeyGuard } from './api-key.guard'
 const DEFAULT_AUTH_METADATA: AuthMetadata = {
   authTypes: [AuthType.Bearer],
   options: {
-    condition: ConditionGuard.Or,
+    condition: ConditionGuard.And,
   },
 }
 
@@ -29,9 +29,7 @@ export class AuthenticationGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const metadata =
-      this.reflector.getAllAndOverride<AuthMetadata>(AUTH_TYPE_KEY, [context.getHandler(), context.getClass()]) ??
-      DEFAULT_AUTH_METADATA
+    const metadata = this.getAuthTypeValue(context)
 
     const { authTypes, options } = metadata
 
@@ -48,30 +46,52 @@ export class AuthenticationGuard implements CanActivate {
       throw new UnauthorizedException()
     }
 
-    let error = new UnauthorizedException()
-    if (options.condition === ConditionGuard.Or) {
-      for (const guard of guards) {
-        const canActivate = await Promise.resolve(guard.canActivate(context)).catch((err) => {
-          error = err
-          return false
-        })
+    return options.condition === ConditionGuard.And
+      ? this.handleAndCondition(guards, context)
+      : this.handleOrCondition(guards, context)
+  }
 
-        if (canActivate) {
+  private getAuthTypeValue(context: ExecutionContext): AuthMetadata {
+    return (
+      this.reflector.getAllAndOverride<AuthMetadata>(AUTH_TYPE_KEY, [context.getHandler(), context.getClass()]) ??
+      DEFAULT_AUTH_METADATA
+    )
+  }
+
+  private async handleOrCondition(guards: CanActivate[], context: ExecutionContext): Promise<boolean> {
+    let lastError: any = null
+
+    // Duyệt qua các guard, nếu 1 guard pass thì return true
+    for (const guard of guards) {
+      try {
+        if (await guard.canActivate(context)) {
           return true
         }
+      } catch (error) {
+        lastError = error
       }
+    }
 
-      throw error
-    } else {
-      for (const guard of guards) {
-        const canActive = await Promise.resolve(guard.canActivate(context)).catch((err) => {
-          error = err
-          return false
-        })
+    if (lastError instanceof HttpException) {
+      throw lastError
+    }
 
-        if (!canActive) {
+    throw new UnauthorizedException()
+  }
+
+  private async handleAndCondition(guards: CanActivate[], context: ExecutionContext): Promise<boolean> {
+    // Duyệt qua các guard, nếu 1 guard not pass thì return false
+
+    for (const guard of guards) {
+      try {
+        if (!(await guard.canActivate(context))) {
+          throw new UnauthorizedException()
+        }
+      } catch (error) {
+        if (error instanceof HttpException) {
           throw error
         }
+        throw new UnauthorizedException()
       }
     }
     return true
