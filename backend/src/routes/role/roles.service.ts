@@ -11,6 +11,7 @@ import {
 import { RoleRepo } from './role.repo'
 import {
   NotFoundRoleException,
+  ProhibitedActionOnBaseRoleException,
   RoleAlreadyExistException,
   RoleNotFoundException,
   RoleValidationNotEmptyException,
@@ -73,13 +74,22 @@ export class RolesService {
 
   async update({ id, data, updatedById }: { id: number; data: UpdateRoleBodyType; updatedById: number }) {
     try {
-      const role = await this.roleRepo.update({
+      const role = await this.roleRepo.findById(id)
+      if (!role) {
+        throw NotFoundRoleException
+      }
+
+      if (role.name === RoleName.ADMIN) {
+        throw ProhibitedActionOnBaseRoleException
+      }
+
+      const updatedRole = await this.roleRepo.update({
         id,
         updatedById,
         data,
       })
 
-      return role
+      return updatedRole
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
         throw RoleValidationNotEmptyException
@@ -99,6 +109,18 @@ export class RolesService {
 
   async delete({ id, deletedById }: { id: number; deletedById: number }) {
     try {
+      // Không cho ai xóa role này
+      const role = await this.roleRepo.findById(id)
+      if (!role) {
+        throw NotFoundRoleException
+      }
+
+      const baseRoles: string[] = [RoleName.ADMIN, RoleName.CLIENT, RoleName.SELLER]
+
+      if (baseRoles.includes(role.name)) {
+        throw ProhibitedActionOnBaseRoleException
+      }
+
       await this.roleRepo.delete({
         id,
         deletedById,
