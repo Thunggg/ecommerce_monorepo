@@ -27,6 +27,22 @@ export class RolesService {
     private readonly prisma: PrismaService,
   ) {}
 
+  private async verifyRole(roleId: number) {
+    const role = await this.roleRepo.findById(roleId)
+
+    if (!role) {
+      throw NotFoundRoleException
+    }
+
+    const baseRoles: string[] = [RoleName.ADMIN, RoleName.CLIENT, RoleName.SELLER]
+
+    if (baseRoles.includes(role.name)) {
+      throw ProhibitedActionOnBaseRoleException
+    }
+
+    return role
+  }
+
   async getClientRoleId(): Promise<number> {
     if (this.clientRoleId) return this.clientRoleId
 
@@ -74,14 +90,7 @@ export class RolesService {
 
   async update({ id, data, updatedById }: { id: number; data: UpdateRoleBodyType; updatedById: number }) {
     try {
-      const role = await this.roleRepo.findById(id)
-      if (!role) {
-        throw NotFoundRoleException
-      }
-
-      if (role.name === RoleName.ADMIN) {
-        throw ProhibitedActionOnBaseRoleException
-      }
+      await this.verifyRole(id)
 
       const updatedRole = await this.roleRepo.update({
         id,
@@ -109,17 +118,7 @@ export class RolesService {
 
   async delete({ id, deletedById }: { id: number; deletedById: number }) {
     try {
-      // Không cho ai xóa role này
-      const role = await this.roleRepo.findById(id)
-      if (!role) {
-        throw NotFoundRoleException
-      }
-
-      const baseRoles: string[] = [RoleName.ADMIN, RoleName.CLIENT, RoleName.SELLER]
-
-      if (baseRoles.includes(role.name)) {
-        throw ProhibitedActionOnBaseRoleException
-      }
+      await this.verifyRole(id)
 
       await this.roleRepo.delete({
         id,
