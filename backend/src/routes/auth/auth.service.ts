@@ -8,9 +8,9 @@ import {
   RefreshTokenBodySchemaType,
   RegisterBodyType,
   SendOTPBodyType,
-  UserType,
   VerifyCationCodeType,
 } from './auth.model'
+import { UserType } from '../../shared/models/entity.model'
 import {
   EmailAlreadyExistsException,
   EmailNotFoundException,
@@ -30,6 +30,7 @@ import {
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 import { AuthRepository } from './auth.repo'
+import { SharedUserRepository } from '../../shared/repositories/shared-user.repo'
 import { generateOTP } from '../../shared/helper/generate-otp'
 import { addMilliseconds } from 'date-fns'
 import { envConfig } from '../../shared/config/validate'
@@ -55,6 +56,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly tokenService: TokenService,
     private readonly twoFactorAuthService: TwoFactorAuthService,
+    private readonly sharedUserRepo: SharedUserRepository,
   ) {
     this.oauth2Client = new google.auth.OAuth2({
       client_id: envConfig.GOOGLE_CLIENT_ID,
@@ -102,7 +104,7 @@ export class AuthService {
   async sendOTP(body: SendOTPBodyType): Promise<MessageResType> {
     try {
       // Tìm user theo email
-      const user = await this.authRepository.findUserByUniqueValue({ email: body.email })
+      const user = await this.sharedUserRepo.findUnique({ email: body.email, deletedAt: null })
 
       // Kiểm tra nếu user đã tồn tại và type là REGISTER
       if (body.type === TypeOfVerificationCode.REGISTER && user) {
@@ -397,9 +399,7 @@ export class AuthService {
     const { code, email, newPassword } = payload
 
     // Kiểm tra xem user có tồn tại hay không
-    const user = await this.authRepository.findUserByUniqueValue({
-      email,
-    })
+    const user = await this.sharedUserRepo.findUnique({ email })
 
     if (!user) {
       throw EmailNotFoundException
@@ -415,7 +415,7 @@ export class AuthService {
     const passwordHashed = await this.hashingService.hash(newPassword)
 
     await Promise.all([
-      this.authRepository.updateUser({ email }, { password: passwordHashed }),
+      this.sharedUserRepo.update({ email }, { password: passwordHashed }),
       this.authRepository.deleteVerifycationCode({ email, type: TypeOfVerificationCode.FORGOT_PASSWORD }),
     ])
 
@@ -447,9 +447,7 @@ export class AuthService {
   }
   async setupTwoFactorAuth(userId: number) {
     // Lấy thông tin user và kiểm tra xem có tồn tại hay ko
-    const user = await this.authRepository.findUserByUniqueValue({
-      id: userId,
-    })
+    const user = await this.sharedUserRepo.findUnique({ id: userId, deletedAt: null })
 
     if (!user) {
       throw EmailNotFoundException
@@ -463,10 +461,11 @@ export class AuthService {
     const { secret, uri } = this.twoFactorAuthService.generateTOTP(user.email)
     // Cập nhật secret vào user trong database
 
-    await this.authRepository.updateUser(
-      { id: userId },
+    await this.sharedUserRepo.update(
+      { id: userId, deletedAt: null },
       {
         totpSecret: secret,
+        updatedById: userId,
       },
     )
     // Trả về secret và uri
@@ -481,9 +480,7 @@ export class AuthService {
     const { code, totpCode } = data
 
     // kiểm tra user có tồn tại hay ko
-    const user = await this.authRepository.findUserByUniqueValue({
-      id: userId,
-    })
+    const user = await this.sharedUserRepo.findUnique({ id: userId })
 
     if (!user) {
       throw EmailNotFoundException
@@ -514,11 +511,12 @@ export class AuthService {
         type: TypeOfVerificationCode.DISABLE_2FA,
       })
     }
-    await this.authRepository.updateUser(
+    await this.sharedUserRepo.update(
       {
         id: userId,
+        deletedAt: null,
       },
-      { totpSecret: null },
+      { totpSecret: null, updatedById: userId },
     )
 
     return {

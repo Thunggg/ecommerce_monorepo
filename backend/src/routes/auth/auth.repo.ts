@@ -49,12 +49,6 @@ export class AuthRepository {
     })
   }
 
-  async findUserByUniqueValue(uniqueValue: { email: string } | { id: number }): Promise<UserType | null> {
-    return this.prisma.user.findUnique({
-      where: uniqueValue,
-    })
-  }
-
   async createVerifycationCode(
     body: Pick<VerifyCationCodeType, 'email' | 'code' | 'type' | 'expiresAt'>,
   ): Promise<VerifyCationCodeType> {
@@ -133,13 +127,6 @@ export class AuthRepository {
   async deleteRefreshToken(uniqueValue: { token: string }): Promise<RefreshTokenType> {
     return await this.prisma.refreshToken.delete({
       where: uniqueValue,
-    })
-  }
-
-  async updateUser(uniqueValue: { email: string } | { id: number }, data: Partial<Omit<UserType, 'id'>>) {
-    return await this.prisma.user.update({
-      where: uniqueValue,
-      data,
     })
   }
 }

@@ -4,7 +4,6 @@ import {
   CreateRoleBodyType,
   GetRolesQueryType,
   GetRolesResType,
-  RoleType,
   RoleWithPermissionsType,
   UpdateRoleBodyType,
 } from './role.model'
@@ -18,6 +17,7 @@ import {
 } from './role.error'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { PrismaService } from '../../shared/services/prisma.service'
+import { RoleType } from '../../shared/models/entity.model'
 
 @Injectable()
 export class RolesService {
@@ -106,10 +106,6 @@ export class RolesService {
 
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
         throw RoleAlreadyExistException
-      }
-
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message)
       }
 
       throw error
