@@ -1,21 +1,5 @@
 import z from 'zod'
-import { HTTPMethod } from '../../shared/constants/role.constant'
-
-// 1. PermissionSchema
-export const PermissionSchema = z.object({
-  id: z.number(),
-  name: z.string().max(500),
-  description: z.string(),
-  module: z.string().max(500),
-  path: z.string().max(1000),
-  method: z.enum(HTTPMethod),
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date().nullable(),
-  deletedById: z.number().nullable(),
-  deletedAt: z.date().nullable(),
-})
+import { PermissionSchema } from '../../shared/models/entity.model'
 
 // 2. GetPermissions response & query
 export const GetPermissionsResSchema = z.object({
@@ -51,8 +35,7 @@ export const CreatePermissionBodySchema = PermissionSchema.pick({
 
 export const UpdatePermissionBodySchema = CreatePermissionBodySchema
 
-// 4. Type exports
-export type PermissionType = z.infer<typeof PermissionSchema>
+// 4. Type exports (PermissionType đã re-export từ shared ở trên)
 export type GetPermissionsResType = z.infer<typeof GetPermissionsResSchema>
 export type GetPermissionsQueryType = z.infer<typeof GetPermissionsQuerySchema>
 export type GetPermissionDetailResType = z.infer<typeof GetPermissionDetailResSchema>

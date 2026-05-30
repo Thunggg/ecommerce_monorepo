@@ -1,19 +1,5 @@
 import z from 'zod'
-import { PermissionSchema } from '../permission/permission.model'
-
-/** Bảng Role */
-export const RoleSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  isActive: z.boolean(),
-  deletedAt: z.date().nullable(),
-  deletedById: z.number().nullable(),
-  createdAt: z.date().nullable(),
-  createdById: z.number().nullable(),
-  updatedAt: z.date().nullable(),
-  updatedById: z.number().nullable(),
-})
+import { PermissionSchema, RoleSchema } from '../../shared/models/entity.model'
 
 export const RoleWithPermissionsSchema = RoleSchema.extend({
   permissions: z.array(PermissionSchema),
@@ -59,7 +45,6 @@ export const UpdateRoleBodySchema = RoleSchema.pick({
   })
   .strict()
 
-export type RoleType = z.infer<typeof RoleSchema>
 export type RoleWithPermissionsType = z.infer<typeof RoleWithPermissionsSchema>
 export type GetRolesResType = z.infer<typeof GetRolesResSchema>
 export type GetRolesQueryType = z.infer<typeof GetRolesQuerySchema>

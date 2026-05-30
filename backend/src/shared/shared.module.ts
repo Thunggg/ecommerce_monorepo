@@ -10,6 +10,7 @@ import { AuthenticationGuard } from './guards/authentication.guard'
 import { AccessTokenGuard } from './guards/access-token.guard'
 import { APIKeyGuard } from './guards/api-key.guard'
 import { TwoFactorAuthService } from './services/2fa.service'
+import { SharedUserRepository } from './repositories/shared-user.repo'
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { TwoFactorAuthService } from './services/2fa.service'
     AccessTokenGuard,
     APIKeyGuard,
     TwoFactorAuthService,
+    SharedUserRepository,
   ],
-  exports: [PrismaService, HashingService, EmailService, TokenService, TwoFactorAuthService],
+  exports: [PrismaService, HashingService, EmailService, TokenService, TwoFactorAuthService, SharedUserRepository],
 })
 export class SharedModule {}

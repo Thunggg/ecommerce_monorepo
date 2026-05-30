@@ -1,31 +1,10 @@
 import { z } from 'zod'
-import { TypeOfVerificationCode, UserStatus } from '../../shared/constants/auth.constant'
+import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
+import { UserSchema } from '../../shared/models/entity.model'
 
 // =============================================================================
 // Entity schemas — khớp model Prisma, dùng cho type inference & validate nội bộ
 // =============================================================================
-
-/** Bảng User */
-export const UserSchema = z.object({
-  id: z.number(),
-  email: z.email('Error.EmailInvalid'),
-  name: z.string({ error: 'Error.FieldNotEmpty' }).min(1, 'Error.FieldNotEmpty').max(100, 'Error.FieldTooLong'),
-  password: z.string({ error: 'Error.FieldNotEmpty' }).min(6, 'Error.PasswordTooShort').max(100, 'Error.FieldTooLong'),
-  phoneNumber: z
-    .string({ error: 'Error.FieldNotEmpty' })
-    .min(9, 'Error.PhoneNumberTooShort')
-    .max(15, 'Error.PhoneNumberTooLong'),
-  avatar: z.string().nullable(),
-  totpSecret: z.string().nullable(),
-  status: z.enum(UserStatus, { error: 'Error.InvalidUserStatus' }),
-  roleId: z.number({ error: 'Error.FieldNotEmpty' }).positive('Error.InvalidRoleId'),
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
-  deletedById: z.number().nullable(),
-  deletedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-})
 
 /** Bảng Device — phiên đăng nhập theo thiết bị */
 export const DeviceSchema = z.object({
@@ -231,8 +210,7 @@ export const TwoFactorSetupResSchema = z
 // Inferred types — dùng trong service / repository
 // =============================================================================
 
-// Entity
-export type UserType = z.infer<typeof UserSchema>
+// Entity (UserType đã re-export từ shared ở trên)
 export type DeviceType = z.infer<typeof DeviceSchema>
 export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>
 export type VerifyCationCodeType = z.infer<typeof VerifyCationCodeSchema>
