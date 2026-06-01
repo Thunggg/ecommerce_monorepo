@@ -59,6 +59,10 @@ export const PermissionSchema = z.object({
   deletedAt: z.date().nullable(),
 })
 
+export const RolePermissionSchema = RoleSchema.extend({
+  permissions: z.array(PermissionSchema),
+})
+
 // =============================================================================
 // Inferred types
 // =============================================================================
@@ -66,3 +70,4 @@ export const PermissionSchema = z.object({
 export type UserType = z.infer<typeof UserSchema>
 export type RoleType = z.infer<typeof RoleSchema>
 export type PermissionType = z.infer<typeof PermissionSchema>
+export type RolePermissionType = z.infer<typeof RolePermissionSchema>

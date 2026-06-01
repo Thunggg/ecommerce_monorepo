@@ -43,7 +43,6 @@ import { google } from 'googleapis'
 import { v4 as uuidv4 } from 'uuid'
 import { MessageResType } from '../../shared/models/response.model'
 import { TwoFactorAuthService } from '../../shared/services/2fa.service'
-import { RolesService } from '../role/roles.service'
 import { SharedRoleRepository } from '../../shared/repositories/shared-role.repo'
 
 @Injectable()
@@ -51,7 +50,6 @@ export class AuthService {
   private oauth2Client: OAuth2Client
 
   constructor(
-    private readonly rolesService: RolesService,
     private readonly hashingService: HashingService,
     private readonly authRepository: AuthRepository,
     private readonly emailService: EmailService,

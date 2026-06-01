@@ -16,16 +16,11 @@ import {
   RoleValidationNotEmptyException,
 } from './role.error'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
-import { PrismaService } from '../../shared/services/prisma.service'
 import { RoleType } from '../../shared/models/entity.model'
 
 @Injectable()
 export class RolesService {
-  private clientRoleId: null | number = null
-  constructor(
-    private readonly roleRepo: RoleRepo,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly roleRepo: RoleRepo) {}
 
   private async verifyRole(roleId: number) {
     const role = await this.roleRepo.findById(roleId)
