@@ -3,6 +3,7 @@ import { PrismaService } from '../../shared/services/prisma.service'
 import { DeviceType, RefreshTokenType, VerifyCationCodeType } from './auth.model'
 import { TypeOfVerificationCode } from '../../shared/constants/auth.constant'
 import { RoleType, UserType } from '../../shared/models/entity.model'
+import { WhereUniqueUserType } from '../../shared/repositories/shared-user.repo'
 
 @Injectable()
 export class AuthRepository {
@@ -73,11 +74,12 @@ export class AuthRepository {
     })
   }
 
-  async findUserIncludeRole(
-    uniqueValue: { email: string } | { id: number },
-  ): Promise<(UserType & { role: RoleType }) | null> {
-    return await this.prisma.user.findUnique({
-      where: uniqueValue,
+  async findUserIncludeRole(where: WhereUniqueUserType): Promise<(UserType & { role: RoleType }) | null> {
+    return await this.prisma.user.findFirst({
+      where: {
+        ...where,
+        deletedAt: null,
+      },
       include: {
         role: true,
       },

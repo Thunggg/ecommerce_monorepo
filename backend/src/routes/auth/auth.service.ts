@@ -104,7 +104,7 @@ export class AuthService {
   async sendOTP(body: SendOTPBodyType): Promise<MessageResType> {
     try {
       // Tìm user theo email
-      const user = await this.sharedUserRepo.findUnique({ email: body.email, deletedAt: null })
+      const user = await this.sharedUserRepo.findUnique({ email: body.email })
 
       // Kiểm tra nếu user đã tồn tại và type là REGISTER
       if (body.type === TypeOfVerificationCode.REGISTER && user) {
@@ -415,7 +415,7 @@ export class AuthService {
     const passwordHashed = await this.hashingService.hash(newPassword)
 
     await Promise.all([
-      this.sharedUserRepo.update({ email }, { password: passwordHashed }),
+      this.sharedUserRepo.update({ id: user.id }, { password: passwordHashed }),
       this.authRepository.deleteVerifycationCode({ email, type: TypeOfVerificationCode.FORGOT_PASSWORD }),
     ])
 
@@ -447,7 +447,7 @@ export class AuthService {
   }
   async setupTwoFactorAuth(userId: number) {
     // Lấy thông tin user và kiểm tra xem có tồn tại hay ko
-    const user = await this.sharedUserRepo.findUnique({ id: userId, deletedAt: null })
+    const user = await this.sharedUserRepo.findUnique({ id: userId })
 
     if (!user) {
       throw EmailNotFoundException
@@ -462,7 +462,7 @@ export class AuthService {
     // Cập nhật secret vào user trong database
 
     await this.sharedUserRepo.update(
-      { id: userId, deletedAt: null },
+      { id: userId },
       {
         totpSecret: secret,
         updatedById: userId,
@@ -514,7 +514,6 @@ export class AuthService {
     await this.sharedUserRepo.update(
       {
         id: userId,
-        deletedAt: null,
       },
       { totpSecret: null, updatedById: userId },
     )
