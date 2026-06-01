@@ -44,6 +44,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { MessageResType } from '../../shared/models/response.model'
 import { TwoFactorAuthService } from '../../shared/services/2fa.service'
 import { RolesService } from '../role/roles.service'
+import { SharedRoleRepository } from '../../shared/repositories/shared-role.repo'
 
 @Injectable()
 export class AuthService {
@@ -57,6 +58,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly twoFactorAuthService: TwoFactorAuthService,
     private readonly sharedUserRepo: SharedUserRepository,
+    private readonly sharedRoleRepo: SharedRoleRepository,
   ) {
     this.oauth2Client = new google.auth.OAuth2({
       client_id: envConfig.GOOGLE_CLIENT_ID,
@@ -74,7 +76,7 @@ export class AuthService {
 
       // Hash và lấy client role id
       const [clientRoleId, hashedPassword] = await Promise.all([
-        this.rolesService.getClientRoleId(),
+        this.sharedRoleRepo.getClientRoleId(),
         this.hashingService.hash(password),
       ])
 
@@ -309,7 +311,7 @@ export class AuthService {
 
       // Nếu user không tồn tại thì tạo mới
       if (!user) {
-        const clientRole = await this.rolesService.getClientRoleId()
+        const clientRole = await this.sharedRoleRepo.getClientRoleId()
         const randomPassword = uuidv4()
         const hashedPassword = await this.hashingService.hash(randomPassword.toString())
 

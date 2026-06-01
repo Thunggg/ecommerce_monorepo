@@ -43,21 +43,6 @@ export class RolesService {
     return role
   }
 
-  async getClientRoleId(): Promise<number> {
-    if (this.clientRoleId) return this.clientRoleId
-
-    const role = await this.prisma.$queryRaw<
-      RoleType[]
-    >`SELECT * FROM "Role" WHERE name = ${RoleName.CLIENT} AND "deletedAt" IS NULL LIMIT 1`
-
-    if (role.length === 0) {
-      throw new Error('Client role not found!')
-    }
-
-    this.clientRoleId = role[0].id
-    return this.clientRoleId
-  }
-
   async list(pagination: GetRolesQueryType): Promise<GetRolesResType> {
     const data = await this.roleRepo.list(pagination)
 
