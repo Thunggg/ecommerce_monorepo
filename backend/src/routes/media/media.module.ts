@@ -5,6 +5,7 @@ import { MulterModule } from '@nestjs/platform-express'
 import { generateRandomFilename } from '../../shared/helper/randome-name-file'
 import multer from 'multer'
 import { envConfig } from '../../shared/config/validate'
+import { existsSync, mkdirSync } from 'fs'
 
 const UPLOAD_DIR = path.resolve(process.cwd(), envConfig.UPLOAD_DIR)
 
@@ -27,4 +28,10 @@ const storage = multer.diskStorage({
     }),
   ],
 })
-export class UploadModule {}
+export class UploadModule {
+  constructor() {
+    if (!existsSync(UPLOAD_DIR)) {
+      mkdirSync(UPLOAD_DIR, { recursive: true })
+    }
+  }
+}
