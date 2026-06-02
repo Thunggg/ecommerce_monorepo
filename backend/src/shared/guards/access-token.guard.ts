@@ -72,10 +72,11 @@ export class AccessTokenGuard implements CanActivate {
       })
 
     const canAccess = role.permissions.length > 0
+
     if (!canAccess) {
       throw new ForbiddenException()
     }
 
-    request[REQUEST_ROLE_PERMISSIONS].roleName = role
+    request[REQUEST_ROLE_PERMISSIONS] = { role }
   }
 }

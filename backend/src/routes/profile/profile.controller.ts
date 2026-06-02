@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Put } from '@nestjs/common'
-import { ProfileService } from './profile.service'
 import { ZodSerializerDto } from 'nestjs-zod'
-import { ChangePasswordBodyDTO, GetUserProfileResDTO, UpdateMeBodyDTO, UpdateProfileResDTO } from './profile.dto'
 import { ActiveUser } from '../../shared/decorators/active-user.decorator'
 import { MessageResDTO } from '../../shared/dtos/response.dto'
+import { ChangePasswordBodyDTO, GetUserProfileResDTO, UpdateMeBodyDTO, UpdateProfileResDTO } from './profile.dto'
+import { ProfileService } from './profile.service'
 
-@Controller('permission')
+@Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 

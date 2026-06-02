@@ -6,7 +6,7 @@
     "moduleResolution": "nodenext",
     "target": "es2021",
     "jsx": "react-jsx",
-    "types": ["node"],
+    "types": ["node", "multer"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false

@@ -14,6 +14,7 @@ const envSchema = z.object({
   GOOGLE_REDIRECT_URI: z.string(),
   GOOGLE_CLIENT_REDIRECT_URI: z.string(),
   APP_NAME: z.string(),
+  UPLOAD_DIR: z.string(),
 })
 
 const envParsed = envSchema.safeParse(process.env)

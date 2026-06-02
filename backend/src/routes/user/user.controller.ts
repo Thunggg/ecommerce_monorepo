@@ -1,6 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { ZodSerializerDto } from 'nestjs-zod'
-import { UsersService } from './user.service'
+import { ActiveRolePermission } from '../../shared/decorators/active-role-permission.decorator'
+import { ActiveUser } from '../../shared/decorators/active-user.decorator'
+import { MessageResDTO } from '../../shared/dtos/response.dto'
+import { GetUserProfileResDTO, UpdateProfileResDTO } from '../profile/profile.dto'
 import {
   CreateUserBodyDTO,
   CreateUserResDTO,
@@ -9,12 +12,9 @@ import {
   GetUsersQueryDTO,
   UpdateUserBodyDTO,
 } from './user.dto'
-import { GetUserProfileResDTO, UpdateProfileResDTO } from '../profile/profile.dto'
-import { ActiveUser } from '../../shared/decorators/active-user.decorator'
-import { ActiveRolePermission } from '../../shared/decorators/active-role-permission.decorator'
-import { MessageResDTO } from '../../shared/dtos/response.dto'
+import { UsersService } from './user.service'
 
-@Controller('role')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UsersService) {}
 
