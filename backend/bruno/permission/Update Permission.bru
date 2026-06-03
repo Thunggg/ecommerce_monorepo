@@ -1,0 +1,24 @@
+meta {
+  name: Update Permission
+  type: http
+  seq: 27
+}
+
+put {
+  url: {{baseUrl}}/permission/106
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "POST /test",
+    "path": "/testttttttt",
+    "method": "POST",
+    "module": "ADMIN"
+  }
+}

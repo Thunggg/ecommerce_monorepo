@@ -1,0 +1,23 @@
+meta {
+  name: Create Role
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{baseUrl}}/role
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "MANAGER",
+    "description": "Manager role",
+    "isActive": true
+  }
+}

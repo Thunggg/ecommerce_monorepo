@@ -1,0 +1,22 @@
+meta {
+  name: Send OTP
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/otp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "lytieulo5@gmail.com",
+    "type": "DISABLE_2FA"
+  }
+}

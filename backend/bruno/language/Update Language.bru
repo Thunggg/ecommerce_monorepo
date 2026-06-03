@@ -1,0 +1,21 @@
+meta {
+  name: Update Language
+  type: http
+  seq: 32
+}
+
+put {
+  url: {{baseUrl}}/language/jp
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Vietnamese Updated"
+  }
+}

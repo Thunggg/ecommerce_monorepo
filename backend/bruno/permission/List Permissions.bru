@@ -1,0 +1,14 @@
+meta {
+  name: List Permissions
+  type: http
+  seq: 24
+}
+
+get {
+  url: {{baseUrl}}/permission?page=1&limit=10
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

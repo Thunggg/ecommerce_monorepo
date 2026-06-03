@@ -1,0 +1,27 @@
+meta {
+  name: Update User
+  type: http
+  seq: 17
+}
+
+put {
+  url: {{baseUrl}}/users/3
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "email": "newuser@example.com",
+    "password": "123456",
+    "name": "New User11111",
+    "phoneNumber": "0901234567",
+    "roleId": 2,
+    "status": "ACTIVE",
+    "avatar": null
+  }
+}

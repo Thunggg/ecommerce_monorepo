@@ -1,0 +1,24 @@
+meta {
+  name: Update Role
+  type: http
+  seq: 22
+}
+
+put {
+  url: {{baseUrl}}/role/4
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "MANAGER",
+    "description": "Manager role 123",
+    "isActive": true,
+    "permissionIds": [80,81, 82]
+  }
+}

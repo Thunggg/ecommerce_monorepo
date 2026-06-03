@@ -1,0 +1,24 @@
+meta {
+  name: Create Permission
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/permission
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "GET /test",
+    "path": "/test",
+    "method": "GET",
+    "module": "USER"
+  }
+}
