@@ -4,15 +4,12 @@ import { PermissionSchema, RoleSchema, UserSchema } from '../../shared/models/en
 export const GetUserProfileResSchema = UserSchema.omit({
   password: true,
   totpSecret: true,
-})
-  .extend({
-    role: RoleSchema.pick({
-      id: true,
-      name: true,
-    }),
-  })
-  .extend({
-    permission: z.array(
+}).extend({
+  role: RoleSchema.pick({
+    id: true,
+    name: true,
+  }).extend({
+    permissions: z.array(
       PermissionSchema.pick({
         id: true,
         name: true,
@@ -21,7 +18,8 @@ export const GetUserProfileResSchema = UserSchema.omit({
         method: true,
       }),
     ),
-  })
+  }),
+})
 
 export const UpdateProfileResSchema = UserSchema.omit({
   password: true,

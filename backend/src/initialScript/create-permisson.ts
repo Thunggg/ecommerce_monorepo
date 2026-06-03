@@ -118,5 +118,23 @@ async function bootstrap() {
       },
     },
   })
+
+  const clientRole = await prisma.role.findFirstOrThrow({
+    where: {
+      name: RoleName.CLIENT,
+      deletedAt: null,
+    },
+  })
+
+  await prisma.role.update({
+    where: {
+      id: clientRole.id,
+    },
+    data: {
+      permissions: {
+        set: updatedPermissionInDb.map((item) => ({ id: item.id })),
+      },
+    },
+  })
 }
 bootstrap()

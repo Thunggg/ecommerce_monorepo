@@ -32,6 +32,7 @@ export class PermissionService {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
         throw PermissionAlreadyExistException
       }
+
       throw error
     }
   }
@@ -46,9 +47,14 @@ export class PermissionService {
 
       return permission
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2005') {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw PermissionAlreadyExistException
+      }
+
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
         throw NotFoundPermissionException
       }
+
       throw error
     }
   }

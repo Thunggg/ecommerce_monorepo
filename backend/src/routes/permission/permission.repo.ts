@@ -87,7 +87,7 @@ export class PermissionRepo {
         })
       : this.prisma.permission.update({
           where: {
-            id: userId,
+            id: permissionId,
             deletedAt: null,
           },
           data: {

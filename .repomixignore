@@ -1,0 +1,10 @@
+.agents
+.claude
+.codex
+.cursor
+.gemini
+.opencode
+backend-e2e
+frontend-e2e
+frontend
+*.md
