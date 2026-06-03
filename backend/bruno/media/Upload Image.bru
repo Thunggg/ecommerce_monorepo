@@ -1,7 +1,7 @@
 meta {
   name: Upload Image
   type: http
-  seq: 34
+  seq: 1
 }
 
 post {
@@ -15,5 +15,6 @@ auth:bearer {
 }
 
 body:multipart-form {
-  file: @file(C:\Users\ASUS\Pictures\Screenshots\Screenshot 2026-05-21 203936.png)
+  files: @file(C:\Users\ASUS\Pictures\Screenshots\Screenshot 2026-05-21 203936.png)
+  files: @file(C:\Users\ASUS\Pictures\Screenshots\Screenshot 2026-05-26 143755.png)
 }
