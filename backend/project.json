@@ -23,10 +23,7 @@
       "dependsOn": ["build"],
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
-      "outputs": [
-        "{workspaceRoot}/dist/backend/package.json",
-        "{workspaceRoot}/dist/backend/pnpm-lock.yaml"
-      ],
+      "outputs": ["{workspaceRoot}/dist/backend/package.json", "{workspaceRoot}/dist/backend/pnpm-lock.yaml"],
       "options": {
         "buildTarget": "build"
       }
@@ -45,17 +42,16 @@
       "executor": "nx:noop"
     },
     "serve": {
-      "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "backend:build",
+        "buildTarget": "backend:build-dev",
+        "watch": true,
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "backend:build:development"
+          "buildTarget": "backend:build-dev:development"
         },
         "production": {
           "buildTarget": "backend:build:production"
@@ -67,11 +63,17 @@
         "passWithNoTests": true
       }
     },
-    "seed": {
-      "executor": "nx:run-commands",
+    "build-dev": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "cache": true,
       "options": {
-        "command": "pnpm run seed",
-        "cwd": "backend"
+        "outputPath": "dist/backend",
+        "main": "backend/src/main.ts",
+        "tsConfig": "backend/tsconfig.app.json",
+        "assets": ["backend/src/assets"],
+        "generatePackageJson": false,
+        "sourceMap": true
       }
     }
   }
