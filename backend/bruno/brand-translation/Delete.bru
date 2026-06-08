@@ -1,0 +1,15 @@
+meta {
+  name: Delete
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/brand-translations/{{brandTranslationId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/brand-translations
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "brandId": 1,
+    "languageId": "vi",
+    "name": "Samsung Electronics",
+    "description": "Công ty của Hàn Quốc"
+  }
+}

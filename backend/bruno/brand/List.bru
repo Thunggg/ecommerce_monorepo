@@ -1,0 +1,15 @@
+meta {
+  name: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/brands?page=1&limit=10
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}

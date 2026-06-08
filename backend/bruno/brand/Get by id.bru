@@ -1,0 +1,19 @@
+meta {
+  name: Get by id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/brands/{{brandId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  brandId: 1
+}

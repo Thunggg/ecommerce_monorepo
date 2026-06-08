@@ -1,0 +1,26 @@
+meta {
+  name: Create
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/brands
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Samsung",
+    "logo": "https://www.freepnglogos.com/uploads/original-samsung-logo-10.png"
+  }
+}

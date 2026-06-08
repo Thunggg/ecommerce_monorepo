@@ -13,6 +13,8 @@ import { MyZodValidationPipe } from '../shared/pipes/custom-zod-validation.pipes
 import { SharedModule } from '../shared/shared.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { BrandModule } from '../routes/brand/brand.module'
+import { BrandTranslationModule } from '../routes/brand/brand-translation/brand-translation.module'
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AppService } from './app.service'
     ProfileModule,
     UserModule,
     UploadModule,
+    BrandModule,
+    BrandTranslationModule,
   ],
   controllers: [AppController],
   providers: [

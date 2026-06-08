@@ -1,0 +1,30 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/brands/{{brandId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Samsung Electronics",
+    "logo": "https://tse2.mm.bing.net/th/id/OIP.jYihLwFOglZGZ1QNYtFqDAHaEJ?rs=1&pid=ImgDetMain&o=7&rm=3"
+  }
+}
+
+vars:pre-request {
+  brandId: 1
+}
