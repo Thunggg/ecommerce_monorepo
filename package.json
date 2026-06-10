@@ -61,6 +61,7 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "axios": "^1.6.0",
+    "nestjs-i18n": "^10.8.4",
     "next": "~16.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

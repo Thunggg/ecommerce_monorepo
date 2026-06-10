@@ -6,7 +6,6 @@ import { IsPublic } from '../../shared/decorators/auth.decorator'
 import path from 'path'
 import { UPLOAD_DIR } from '../../shared/constants/other.constant'
 import type { Response } from 'express'
-import { error } from 'console'
 
 @Controller('media')
 export class MediaController {

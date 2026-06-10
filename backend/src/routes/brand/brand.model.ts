@@ -29,7 +29,6 @@ export const GetBrandParamsSchema = z
   .object({
     brandId: z.coerce.number().int().positive(),
   })
-
   .strict()
 
 export const GetBrandDetailResSchema = BrandIncludeTranslationSchema

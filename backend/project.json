@@ -71,8 +71,15 @@
         "outputPath": "dist/backend",
         "main": "backend/src/main.ts",
         "tsConfig": "backend/tsconfig.app.json",
-        "assets": ["backend/src/assets"],
-        "generatePackageJson": false,
+        "assets": [
+          "backend/src/assets",
+          {
+            "input": "backend/src",
+            "glob": "i18n/**/*",
+            "output": "src"
+          }
+        ],
+        "generatePackageJson": true,
         "sourceMap": true
       }
     }
