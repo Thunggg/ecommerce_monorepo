@@ -1,0 +1,31 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/categories/{{categoryId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Smartphone",
+    "logo": "https://i.pinimg.com/736x/5d/30/63/5d30638607c289131b4b084c5a008e1f.jpg",
+    "parentCategoryId": 1
+  }
+}
+
+vars:pre-request {
+  categoryId: 1
+}

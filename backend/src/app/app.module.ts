@@ -6,6 +6,8 @@ import * as path from 'path'
 import { AuthModule } from '../routes/auth/auth.module'
 import { BrandTranslationModule } from '../routes/brand/brand-translation/brand-translation.module'
 import { BrandModule } from '../routes/brand/brand.module'
+import { CategoryTranslationModule } from '../routes/category/category-translation/category-translation.module'
+import { CategoryModule } from '../routes/category/category.module'
 import { LanguageModule } from '../routes/language/language.module'
 import { UploadModule } from '../routes/media/media.module'
 import { PermissionModule } from '../routes/permission/permission.module'
@@ -39,6 +41,8 @@ import { AppService } from './app.service'
     UploadModule,
     BrandModule,
     BrandTranslationModule,
+    CategoryModule,
+    CategoryTranslationModule,
   ],
   controllers: [AppController],
   providers: [

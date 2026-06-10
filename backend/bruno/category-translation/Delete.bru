@@ -1,0 +1,23 @@
+meta {
+  name: Delete
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/category-translations/{{categoryTranslationId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+vars:pre-request {
+  categoryTranslationId: 1
+}

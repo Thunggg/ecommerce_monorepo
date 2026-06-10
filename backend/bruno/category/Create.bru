@@ -1,0 +1,27 @@
+meta {
+  name: Create
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Điện thoại",
+    "logo": "https://i.pinimg.com/736x/17/43/26/174326706070dc4086dda310ca53cbf4.jpg",
+    "parentCategoryId": null
+  }
+}

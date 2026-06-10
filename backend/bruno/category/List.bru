@@ -1,0 +1,23 @@
+meta {
+  name: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/categories
+  body: none
+  auth: none
+}
+
+params:query {
+  ~parentCategoryId: {{parentCategoryId}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  parentCategoryId: 1
+}

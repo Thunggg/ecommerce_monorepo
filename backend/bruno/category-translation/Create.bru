@@ -1,0 +1,28 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/category-translations
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "categoryId": 2,
+    "languageId": "vi",
+    "name": "Điện tử",
+    "description": "Thiết bị điện tử và tiện ích"
+  }
+}
