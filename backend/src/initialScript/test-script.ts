@@ -10,20 +10,6 @@ type SKU = {
   image: string
 }
 
-type Data = {
-  product: {
-    publishedAt: string | null // ISO date string
-    name: string
-    basePrice: number
-    virtualPrice: number
-    brandId: number
-    images: string[]
-    variants: Variant[]
-    categories: number[]
-  }
-  skus: SKU[]
-}
-
 function generateSkus(variants: Variant[]): SKU[] {
   if (variants.length === 0) return []
 
