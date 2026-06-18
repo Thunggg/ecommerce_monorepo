@@ -12,6 +12,10 @@ datasource db {
   provider = "postgresql"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 model Language {
   id                   String                @id @db.VarChar(10)
   name                 String                @db.VarChar(500)
