@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { ALL_LANGUAGE_CODE } from '../../shared/constants/other.constant'
 import { PrismaService } from '../../shared/services/prisma.service'
-import { GetProductDetailResType, GetProductsQueryType, GetProductsResType, ProductType } from './product.model'
+import {
+  CreateProductBodyType,
+  GetProductDetailResType,
+  GetProductsQueryType,
+  GetProductsResType,
+  ProductType,
+} from './product.model'
 
 @Injectable()
 export class productRepo {
@@ -70,6 +76,67 @@ export class productRepo {
           include: {
             categoryTranslations: {
               where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { languageId, deletedAt: null },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  async create({
+    createdById,
+    data,
+  }: {
+    createdById: number
+    data: CreateProductBodyType
+  }): Promise<GetProductDetailResType> {
+    const { skus, categories, ...productData } = data
+
+    return this.prisma.product.create({
+      data: {
+        createdById,
+        ...productData,
+        categories: {
+          connect: categories.map((categoryId) => ({ id: categoryId })),
+        },
+        skus: {
+          createMany: {
+            data: skus.map((sku) => ({
+              ...sku,
+              createdById,
+            })),
+          },
+        },
+      },
+      include: {
+        productTranslations: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        skus: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        brand: {
+          include: {
+            brandTranslations: {
+              where: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+        categories: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            categoryTranslations: {
+              where: {
+                deletedAt: null,
+              },
             },
           },
         },
