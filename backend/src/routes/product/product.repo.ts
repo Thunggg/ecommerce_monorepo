@@ -145,6 +145,9 @@ export class productRepo {
     })
   }
 
+  // 1) SKU đã tồn tại trong DB nhưng ko có trong payload thì sẽ bị xóa
+  // 2) SKU đã tồn tại trong DB nhưng có trong data payload thì sẽ được cập nhật
+  // 3) SKU ko tồn tại trong DB nhưng có trong data payload thì sẽ được thêm mới
   async update({
     id,
     updatedById,
@@ -238,17 +241,19 @@ export class productRepo {
       ),
 
       // Tạo mới các SKU ko có trong DB
-      ...skusToCreate.map((sku) =>
-        this.prisma.sKU.createMany({
-          data: skusToCreate,
-        }),
-      ),
+      ...(skusToCreate.length > 0
+        ? [
+            this.prisma.sKU.createMany({
+              data: skusToCreate,
+            }),
+          ]
+        : []),
     ])
 
     return product
   }
 
-  async delete({ id, deletedById }: { id: number; deletedById: number }, isHard: boolean): Promise<ProductType> {
+  async delete({ id, deletedById }: { id: number; deletedById: number }, isHard?: boolean): Promise<ProductType> {
     const now = new Date()
 
     if (isHard) {

@@ -31,12 +31,12 @@ function generateSkus(variants: Variant[]): SKU[] {
 
 const data = generateSkus([
   {
-    value: 'color',
-    options: ['red', 'blue', 'green'],
+    value: 'Màu sắc',
+    options: ['Đỏ', 'Xanh', 'Vàng', 'Đen'],
   },
   {
-    value: 'size',
-    options: ['S', 'M', 'L'],
+    value: 'Kích cỡ',
+    options: ['S', 'M', 'L', 'XL'],
   },
 ])
 

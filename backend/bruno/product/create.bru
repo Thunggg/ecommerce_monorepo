@@ -1,0 +1,111 @@
+meta {
+  name: Create Product
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Áo thun thể thao",
+    "publishedAt": "2026-06-19T10:00:00Z",
+    "basePrice": 200000,
+    "virtualPrice": 250000,
+    "brandId": 1,
+    "images": [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg"
+    ],
+    "categories": [
+      1,
+      2
+    ],
+    "variants": [
+      {
+        "value": "Màu sắc",
+        "options": [
+          "Đỏ",
+          "Xanh",
+          "Vàng"
+        ]
+      },
+      {
+        "value": "Kích cỡ",
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "skus": [
+      {
+        "value": "Đỏ-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đỏ-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đỏ-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      }
+    ]
+  }
+}

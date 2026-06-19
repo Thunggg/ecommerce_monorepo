@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
-import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
+import { I18nModule } from 'nestjs-i18n'
 import { ZodSerializerInterceptor } from 'nestjs-zod'
 import * as path from 'path'
 import { AuthModule } from '../routes/auth/auth.module'
@@ -11,10 +11,13 @@ import { CategoryModule } from '../routes/category/category.module'
 import { LanguageModule } from '../routes/language/language.module'
 import { UploadModule } from '../routes/media/media.module'
 import { PermissionModule } from '../routes/permission/permission.module'
+import { ProductTranslationModule } from '../routes/product/product-traslation/product-translation.module'
+import { ProductModule } from '../routes/product/product.module'
 import { ProfileModule } from '../routes/profile/profile.module'
 import { RoleModule } from '../routes/role/role.module'
 import { UserModule } from '../routes/user/user.module'
 import { HttpExceptionFilter } from '../shared/filters/http-exception.filter'
+import { workspaceRoot } from '../shared/helper/workspace'
 import { MyZodValidationPipe } from '../shared/pipes/custom-zod-validation.pipes'
 import { SharedModule } from '../shared/shared.module'
 import { AppController } from './app.controller'
@@ -25,11 +28,10 @@ import { AppService } from './app.service'
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.join(process.cwd(), 'backend/src/i18n'),
+        path: path.join(workspaceRoot, 'backend/src/i18n'),
         watch: true,
       },
-      typesOutputPath: path.join(process.cwd(), 'backend/src/generated/i18n.generated.ts'),
-      resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver, new HeaderResolver(['x-lang'])],
+      typesOutputPath: path.join(workspaceRoot, 'backend/src/generated/i18n.generated.ts'),
     }),
     SharedModule,
     AuthModule,
@@ -43,6 +45,8 @@ import { AppService } from './app.service'
     BrandTranslationModule,
     CategoryModule,
     CategoryTranslationModule,
+    ProductModule,
+    ProductTranslationModule,
   ],
   controllers: [AppController],
   providers: [

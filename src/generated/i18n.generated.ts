@@ -7,7 +7,6 @@ import type { Path } from "nestjs-i18n";
 export type I18nTranslations = {
     "error": {
         "NOT_FOUND": string;
-        "INTERNAL_SERVER_ERROR": string;
     };
 };
 /* prettier-ignore */

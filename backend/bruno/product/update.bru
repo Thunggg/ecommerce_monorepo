@@ -1,0 +1,156 @@
+meta {
+  name: Update Product
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/products/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "publishedAt": "2026-06-20T10:00:00Z",
+    "name": "Áo thun thể thao cao cấp",
+    "basePrice": 220000,
+    "virtualPrice": 280000,
+    "brandId": 1,
+    "images": [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg",
+      "https://example.com/image3.jpg"
+    ],
+    "variants": [
+      {
+        "value": "Màu sắc",
+        "options": [
+          "Đỏ",
+          "Xanh",
+          "Vàng",
+          "Đen"
+        ]
+      },
+      {
+        "value": "Kích cỡ",
+        "options": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ]
+      }
+    ],
+    "categories": [
+      1,
+      2
+    ],
+    "skus": [
+      {
+        "value": "Đỏ-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đỏ-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đỏ-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đỏ-XL",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Xanh-XL",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Vàng-XL",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đen-S",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đen-M",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đen-L",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      },
+      {
+        "value": "Đen-XL",
+        "price": 0,
+        "stock": 100,
+        "image": ""
+      }
+    ]
+  }
+}
