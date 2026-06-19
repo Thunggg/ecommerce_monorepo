@@ -1,0 +1,130 @@
+import { ForbiddenException, Injectable } from '@nestjs/common'
+import { I18nContext } from 'nestjs-i18n'
+import { isNotFoundPrismaError, NotFoundRecordException } from '../../shared/helper/error'
+import { CreateProductBodyType, GetManageProductsQueryType, UpdateProductBodyType } from './product.model'
+import { productRepo } from './product.repo'
+import { RoleName } from '../../shared/constants/role.constant'
+
+@Injectable()
+export class ManageProductService {
+  constructor(private productRepo: productRepo) {}
+
+  // Kiểm tra nếu người dùng ko phải người tạo sản phẩm hoặc admin thì ko cho tiếp tục
+  validatePrivilege({
+    userIdRequest,
+    roleNameRequest,
+    createdById
+  }: {
+    userIdRequest: number
+    roleNameRequest: string
+    createdById: number | undefined | null
+  }) {
+    if (createdById !== userIdRequest && roleNameRequest !== RoleName.ADMIN) {
+      throw new ForbiddenException()
+    }
+
+    return true
+  }
+
+  // Xem danh sách sản phẩm của 1 shop, bắt buộc phải truyền query param là 'createdById'
+  async list(props: {query: GetManageProductsQueryType, userIdRequest: number, roleNameRequest: string}) {
+
+    this.validatePrivilege({
+      userIdRequest: props.userIdRequest,
+      roleNameRequest: props.roleNameRequest,
+      createdById: props.query.createdById,
+    })
+
+    const data = await this.productRepo.list({
+      page: props.query.page,
+      limit: props.query.limit,
+      languageId: I18nContext.current()?.lang as string,
+      createdById: props.query.createdById,
+    })
+    return data
+  }
+
+  async getDetail(props: {productId: number, userIdRequest: number, roleNameRequest: string}) {
+    const product = await this.productRepo.getDetail({
+      productId: props.productId,
+      languageId: I18nContext.current()?.lang as string
+    })
+    if (!product) {
+      throw NotFoundRecordException
+    }
+
+    this.validatePrivilege({
+      userIdRequest: props.userIdRequest,
+      roleNameRequest: props.roleNameRequest,
+      createdById: product.createdById,
+    })
+
+    return product
+  }
+
+  async create({ data, createdById }: { data: CreateProductBodyType; createdById: number }) {
+    return this.productRepo.create({
+      createdById,
+      data,
+    })
+  }
+
+  async update({ productId, data, updatedById, roleNameRequest }: { productId: number; data: UpdateProductBodyType; updatedById: number, roleNameRequest: string }) {
+    
+    const product = await this.productRepo.findById({productId})
+    if (!product) {
+      throw NotFoundRecordException
+    }
+
+    this.validatePrivilege({
+      userIdRequest: updatedById,
+      roleNameRequest: roleNameRequest,
+      createdById: product.createdById,
+    })
+
+    try {
+      const updatedProduct = await this.productRepo.update({
+        id: productId,
+        updatedById,
+        data,
+      })
+      return updatedProduct
+    } catch (error) {
+      console.log('error', error)
+      if (isNotFoundPrismaError(error)) {
+        throw NotFoundRecordException
+      }
+      throw error
+    }
+  }
+
+  async delete({ productId, deletedById, roleNameRequest }: { productId: number; deletedById: number, roleNameRequest: string }) {
+
+    const product = await this.productRepo.findById({productId})
+    if (!product) {
+      throw NotFoundRecordException
+    }
+
+    this.validatePrivilege({
+      userIdRequest: deletedById,
+      roleNameRequest: roleNameRequest,
+      createdById: product.createdById,
+    })
+
+    try {
+      await this.productRepo.delete({
+        id: productId,
+        deletedById,
+      })
+      return {
+        message: 'Delete successfully',
+      }
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw NotFoundRecordException
+      }
+
+      throw error
+    }
+  }
+}
