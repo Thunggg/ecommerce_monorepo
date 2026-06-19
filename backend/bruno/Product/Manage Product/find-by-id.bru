@@ -5,15 +5,15 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/products/1
+  url: {{baseUrl}}/manage-product/products/4
   body: none
   auth: bearer
 }
 
-auth:bearer {
-  token: {{accessToken}}
-}
-
 headers {
   Accept: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
 }

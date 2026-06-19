@@ -8,6 +8,7 @@ import {
   ProductType,
   UpdateProductBodyType,
 } from './product.model'
+import { ProductWhereInput, ProductWhereUniqueInput } from '../../generated/prisma/models'
 
 @Injectable()
 export class productRepo {
@@ -38,10 +39,25 @@ export class productRepo {
   }): Promise<GetProductsResType> {
     const skip = (page - 1) * limit
     const take = limit
-    const where = {
+
+    let  where: ProductWhereInput = {
       deletedAt: null,
       createdById: createdById ? createdById : undefined,
-      publishedAt: isPublic ? { lte: new Date(), not: null } : undefined,
+    }
+
+    if(isPublic === true){
+      where.publishedAt = {
+        lte: new Date(), 
+        not: null
+      }
+    } else if(isPublic === false){
+      where = {
+        ...where,
+        OR: [
+          { publishedAt: null },
+          { publishedAt: { gt: new Date() } }
+        ]
+      }
     }
 
     const [totalItems, data] = await Promise.all([
@@ -89,12 +105,28 @@ export class productRepo {
     languageId: string
     isPublic?: boolean
   }): Promise<GetProductDetailResType | null> {
+    let  where: ProductWhereUniqueInput = {
+      id: productId,
+      deletedAt: null
+    }
+
+    if(isPublic === true){
+      where.publishedAt = {
+        lte: new Date(), 
+        not: null
+      }
+    } else if(isPublic === false){
+      where = {
+        ...where,
+        OR: [
+          { publishedAt: null},
+          { publishedAt: {gt: new Date()}}
+        ]
+      }
+    }
+
     return this.prisma.product.findUnique({
-      where: {
-        id: productId,
-        deletedAt: null,
-        publishedAt: isPublic ? { lte: new Date(), not: null } : undefined,
-      },
+      where,
       include: {
         productTranslations: {
           where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { languageId, deletedAt: null },

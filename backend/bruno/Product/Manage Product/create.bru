@@ -5,22 +5,22 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/products
+  url: {{baseUrl}}/manage-product/products
   body: json
   auth: bearer
-}
-
-auth:bearer {
-  token: {{accessToken}}
 }
 
 headers {
   Content-Type: application/json
 }
 
+auth:bearer {
+  token: {{accessToken}}
+}
+
 body:json {
   {
-    "name": "Áo thun thể thao",
+    "name": "Quần thể thao do seller 1 tạo",
     "publishedAt": "2026-06-19T10:00:00Z",
     "basePrice": 200000,
     "virtualPrice": 250000,

@@ -1,0 +1,24 @@
+meta {
+  name: List Products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/manage-product/products?createdById=4&isPublic=false
+  body: none
+  auth: bearer
+}
+
+params:query {
+  createdById: 4
+  isPublic: false
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
