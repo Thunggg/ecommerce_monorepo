@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/manage-product/products?createdById=4&name=Do&minPrice=100000&maxPrice=500000
+  url: {{baseUrl}}/manage-product/products?createdById=4&name=Do&minPrice=100000&maxPrice=500000&orderBy=desc&sortBy=price
   body: none
   auth: bearer
 }
@@ -15,6 +15,8 @@ params:query {
   name: Do
   minPrice: 100000
   maxPrice: 500000
+  orderBy: desc
+  sortBy: price
   ~brandIds: 2
   ~brandIds: 1
   ~page: 1

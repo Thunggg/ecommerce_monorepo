@@ -3,6 +3,7 @@ import { BrandIncludeTranslationSchema } from '../../shared/models/shared-brand.
 import { CategoryIncludeTranslationSchema } from '../../shared/models/shared-category.model'
 import { ProductTranslationSchema } from './product-traslation/product-translation.model'
 import { SKUSchema, UpsertSKUBodySchema } from './sku.model'
+import { OrderBy, SortBy } from '../../shared/constants/other.constant'
 
 type Variant = {
   value: string
@@ -117,6 +118,8 @@ export const GetProductsQuerySchema = z.object({
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
   createdById: z.coerce.number().int().positive().optional(),
+  orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
+  sortBy: z.enum([SortBy.CreatedAt, SortBy.Price, SortBy.Sale]).default(SortBy.CreatedAt),
 })
 
 // Dành cho admin và seller
