@@ -1,15 +1,18 @@
-import 'dotenv/config'
 import { NestFactory } from '@nestjs/core'
+import 'dotenv/config'
 import { AppModule } from '../app/app.module'
-import { PrismaService } from '../shared/services/prisma.service'
 import { HTTPMethod, RoleName } from '../shared/constants/role.constant'
+import { PrismaService } from '../shared/services/prisma.service'
+
+const prisma = new PrismaService()
+
+const sellerModule = ['AUTH', 'MEDIA', 'PRODUCT', 'MANAGE-PRODUCT', 'PRODUCT-TRANSLATION', 'PROFILE']
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   await app.listen(3000)
   const server = app.getHttpAdapter().getInstance()
   const router = server.router
-  const prisma = new PrismaService()
 
   // Query vào DB để lấy ra danh sách các permission
   const permissionInDB = await prisma.permission.findMany({
@@ -100,24 +103,17 @@ async function bootstrap() {
     },
   })
 
-  // Cập nhật lại các permissions trong Admin
-  const adminRole = await prisma.role.findFirstOrThrow({
-    where: {
-      name: RoleName.ADMIN,
-      deletedAt: null,
-    },
-  })
+  const adminPermissionIds = updatedPermissionInDb.map((item) => ({
+    id: item.id,
+  }))
 
-  await prisma.role.update({
-    where: {
-      id: adminRole.id,
-    },
-    data: {
-      permissions: {
-        set: updatedPermissionInDb.map((item) => ({ id: item.id })),
-      },
-    },
-  })
+  const sellerPermissionIds = updatedPermissionInDb
+    .filter((item) => sellerModule.includes(item.module))
+    .map((item) => ({
+      id: item.id,
+    }))
+
+  await Promise.all([updateRole(adminPermissionIds, RoleName.ADMIN), updateRole(sellerPermissionIds, RoleName.SELLER)])
 
   const clientRole = await prisma.role.findFirstOrThrow({
     where: {
@@ -137,4 +133,25 @@ async function bootstrap() {
     },
   })
 }
+
+const updateRole = async (permissionIds: { id: number }[], roleName: string) => {
+  const role = await prisma.role.findFirstOrThrow({
+    where: {
+      name: roleName,
+      deletedAt: null,
+    },
+  })
+
+  await prisma.role.update({
+    where: {
+      id: role.id,
+    },
+    data: {
+      permissions: {
+        set: permissionIds,
+      },
+    },
+  })
+}
+
 bootstrap()
