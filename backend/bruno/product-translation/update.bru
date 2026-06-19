@@ -1,0 +1,28 @@
+meta {
+  name: Update Product Translation
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/product-translations/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "productId": 2,
+    "name": "Áo thun thể thao cao cấp",
+    "description": "Mô tả chi tiết về áo thun thể thao cao cấp mới nhất",
+    "languageId": "en"
+  }
+}

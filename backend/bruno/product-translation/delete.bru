@@ -1,0 +1,19 @@
+meta {
+  name: Delete Product Translation
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/product-translations/1
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

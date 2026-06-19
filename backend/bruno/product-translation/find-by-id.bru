@@ -1,0 +1,19 @@
+meta {
+  name: Get Product Translation Detail
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/product-translations/1
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
