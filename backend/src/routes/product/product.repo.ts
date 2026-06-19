@@ -60,6 +60,36 @@ export class productRepo {
       }
     }
 
+    if(name){
+      where.name = {
+        contains: name,
+        mode: 'insensitive'
+      }
+    }
+
+    if(brandIds && brandIds.length > 0){
+      where.brandId = {
+        in: brandIds
+      }
+    }
+
+    if(categories && categories.length > 0){
+      where.categories = {
+        some: {
+          id: {
+            in: categories
+          }
+        }
+      }
+    }
+
+    if(minPrice !== undefined || maxPrice !== undefined){
+      where.basePrice = {
+        gte: minPrice,
+        lte: maxPrice
+      }
+    }
+
     const [totalItems, data] = await Promise.all([
       this.prisma.product.count({
         where,

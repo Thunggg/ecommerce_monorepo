@@ -5,14 +5,23 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/manage-product/products?createdById=4&isPublic=false
+  url: {{baseUrl}}/manage-product/products?createdById=4&name=Do&minPrice=100000&maxPrice=500000
   body: none
   auth: bearer
 }
 
 params:query {
   createdById: 4
-  isPublic: false
+  name: Do
+  minPrice: 100000
+  maxPrice: 500000
+  ~brandIds: 2
+  ~brandIds: 1
+  ~page: 1
+  ~limit: 10
+  ~categories: 3
+  ~categories: 4
+  ~isPublic: false
 }
 
 headers {
