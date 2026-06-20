@@ -1,18 +1,5 @@
 import { z } from 'zod'
-
-export const ProductTranslationSchema = z.object({
-  id: z.number(),
-  productId: z.number(),
-  name: z.string().max(500),
-  description: z.string(),
-  languageId: z.string(),
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
-  deletedById: z.number().nullable(),
-  deletedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-})
+import { ProductTranslationSchema } from '../../../shared/models/shared-product-translation.model'
 
 export const GetProductTranslationParamsSchema = z
   .object({
@@ -32,7 +19,6 @@ export const CreateProductTranslationBodySchema = ProductTranslationSchema.pick(
 export const UpdateProductTranslationBodySchema = CreateProductTranslationBodySchema
 export const DeleteProductTranslationParamsSchema = GetProductTranslationParamsSchema
 
-export type ProductTranslationType = z.infer<typeof ProductTranslationSchema>
 export type GetProductTranslationParamsType = z.infer<typeof GetProductTranslationParamsSchema>
 export type GetProductTranslationDetailResType = z.infer<typeof GetProductTranslationDetailResSchema>
 export type CreateProductTranslationBodyType = z.infer<typeof CreateProductTranslationBodySchema>

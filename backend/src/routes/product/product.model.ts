@@ -2,10 +2,10 @@ import { z } from 'zod'
 import { OrderBy, SortBy } from '../../shared/constants/other.constant'
 import { BrandIncludeTranslationSchema } from '../../shared/models/shared-brand.model'
 import { CategoryIncludeTranslationSchema } from '../../shared/models/shared-category.model'
-import { ProductTranslationSchema } from './product-traslation/product-translation.model'
 import { UpsertSKUBodySchema } from './sku.model'
 import { ProductSchema } from '../../shared/models/shared-product.model'
 import { SKUSchema } from '../../shared/models/shared-sku.model'
+import { ProductTranslationSchema } from '../../shared/models/shared-product-translation.model'
 
 type Variant = {
   value: string
