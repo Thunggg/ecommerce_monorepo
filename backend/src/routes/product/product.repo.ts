@@ -215,7 +215,7 @@ export class productRepo {
                 ), '[]'::json)
               )
            )
-         )
+         ) ORDER BY "CartItem"."updatedAt" DESC
        ) AS "cartItems",
        jsonb_build_object(
          'id', "User"."id",
