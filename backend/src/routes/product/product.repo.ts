@@ -5,7 +5,6 @@ import {
   CreateProductBodyType,
   GetProductDetailResType,
   GetProductsResType,
-  ProductType,
   UpdateProductBodyType,
 } from './product.model'
 import {
@@ -13,6 +12,7 @@ import {
   ProductWhereInput,
   ProductWhereUniqueInput,
 } from '../../generated/prisma/models'
+import { ProductType } from '../../shared/models/shared-product.model'
 
 @Injectable()
 export class productRepo {
