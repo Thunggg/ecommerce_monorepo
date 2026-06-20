@@ -6,7 +6,8 @@ import { PrismaService } from '../shared/services/prisma.service'
 
 const prisma = new PrismaService()
 
-const sellerModule = ['AUTH', 'MEDIA', 'PRODUCT', 'MANAGE-PRODUCT', 'PRODUCT-TRANSLATION', 'PROFILE']
+const sellerModule = ['AUTH', 'MEDIA', 'PRODUCT', 'MANAGE-PRODUCT', 'PRODUCT-TRANSLATION', 'PROFILE', 'CART']
+const clientModule = ['AUTH', 'MEDIA', 'CART', 'PROFILE']
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -113,7 +114,17 @@ async function bootstrap() {
       id: item.id,
     }))
 
-  await Promise.all([updateRole(adminPermissionIds, RoleName.ADMIN), updateRole(sellerPermissionIds, RoleName.SELLER)])
+  const clientPermissionIds = updatedPermissionInDb
+    .filter((item) => clientModule.includes(item.module))
+    .map((item) => ({
+      id: item.id,
+    }))
+
+  await Promise.all([
+    updateRole(adminPermissionIds, RoleName.ADMIN),
+    updateRole(sellerPermissionIds, RoleName.SELLER),
+    updateRole(clientPermissionIds, RoleName.CLIENT),
+  ])
 
   const clientRole = await prisma.role.findFirstOrThrow({
     where: {

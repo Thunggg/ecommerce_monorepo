@@ -1,0 +1,25 @@
+meta {
+  name: Delete Cart Items
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/cart/delete
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "cartItemIds": [1, 2, 3]
+  }
+}

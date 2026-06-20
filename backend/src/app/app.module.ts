@@ -22,6 +22,7 @@ import { MyZodValidationPipe } from '../shared/pipes/custom-zod-validation.pipes
 import { SharedModule } from '../shared/shared.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { CartModule } from '../routes/cart/cart.module'
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AppService } from './app.service'
     CategoryTranslationModule,
     ProductModule,
     ProductTranslationModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [
