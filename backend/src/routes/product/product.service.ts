@@ -8,7 +8,7 @@ import { productRepo } from './product.repo'
 export class ProductService {
   constructor(private productRepo: productRepo) {}
 
-  async list(props: {query: GetProductsQueryType}) {
+  async list(props: { query: GetProductsQueryType }) {
     const data = await this.productRepo.list({
       page: props.query.page,
       limit: props.query.limit,
@@ -26,7 +26,7 @@ export class ProductService {
     return data
   }
 
-  async getDetail(props: {productId: number}) {
+  async getDetail(props: { productId: number }) {
     const product = await this.productRepo.getDetail({
       productId: props.productId,
       languageId: I18nContext.current()?.lang as string,

@@ -8,7 +8,11 @@ import {
   ProductType,
   UpdateProductBodyType,
 } from './product.model'
-import { ProductOrderByWithRelationInput, ProductWhereInput, ProductWhereUniqueInput } from '../../generated/prisma/models'
+import {
+  ProductOrderByWithRelationInput,
+  ProductWhereInput,
+  ProductWhereUniqueInput,
+} from '../../generated/prisma/models'
 
 @Injectable()
 export class productRepo {
@@ -26,7 +30,7 @@ export class productRepo {
     isPublic,
     languageId,
     orderBy,
-    sortBy
+    sortBy,
   }: {
     limit: number
     page: number
@@ -38,76 +42,73 @@ export class productRepo {
     createdById?: number
     isPublic?: boolean
     languageId: string
-    orderBy: OrderByType 
+    orderBy: OrderByType
     sortBy: SortByType
   }): Promise<GetProductsResType> {
     const skip = (page - 1) * limit
     const take = limit
 
-    let  where: ProductWhereInput = {
+    let where: ProductWhereInput = {
       deletedAt: null,
       createdById: createdById ? createdById : undefined,
     }
 
-    if(isPublic === true){
+    if (isPublic === true) {
       where.publishedAt = {
-        lte: new Date(), 
-        not: null
+        lte: new Date(),
+        not: null,
       }
-    } else if(isPublic === false){
+    } else if (isPublic === false) {
       where = {
         ...where,
-        OR: [
-          { publishedAt: null },
-          { publishedAt: { gt: new Date() } }
-        ]
+        OR: [{ publishedAt: null }, { publishedAt: { gt: new Date() } }],
       }
     }
 
-    if(name){
+    if (name) {
       where.name = {
         contains: name,
-        mode: 'insensitive'
+        mode: 'insensitive',
       }
     }
 
-    if(brandIds && brandIds.length > 0){
+    if (brandIds && brandIds.length > 0) {
       where.brandId = {
-        in: brandIds
+        in: brandIds,
       }
     }
 
-    if(categories && categories.length > 0){
+    if (categories && categories.length > 0) {
       where.categories = {
         some: {
           id: {
-            in: categories
-          }
-        }
+            in: categories,
+          },
+        },
       }
     }
 
-    if(minPrice !== undefined || maxPrice !== undefined){
+    if (minPrice !== undefined || maxPrice !== undefined) {
       where.basePrice = {
         gte: minPrice,
-        lte: maxPrice
+        lte: maxPrice,
       }
     }
 
     // Mặc định sort theo createdAt mới nhất
     let caculatedOrderBy: ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[] = {
-      createdAt: orderBy
+      createdAt: orderBy,
     }
 
-    if(sortBy === SortBy.Price){
+    if (sortBy === SortBy.Price) {
       caculatedOrderBy = {
-        basePrice: orderBy
+        basePrice: orderBy,
       }
-    } else if(sortBy === SortBy.Sale){
+    } else if (sortBy === SortBy.Sale) {
       caculatedOrderBy = {
         orders: {
-          _count: orderBy
-        }
+          _count: orderBy,
+        },
       }
     }
 
@@ -124,9 +125,9 @@ export class productRepo {
           orders: {
             where: {
               deletedAt: null,
-              status: 'DELIVERED'
-            }
-          }
+              status: 'DELIVERED',
+            },
+          },
         },
         orderBy: caculatedOrderBy,
         skip,
@@ -142,7 +143,7 @@ export class productRepo {
     }
   }
 
-  async findById({productId}: {productId: number}) {
+  async findById({ productId }: { productId: number }) {
     return this.prisma.product.findUnique({
       where: {
         id: productId,
@@ -160,23 +161,20 @@ export class productRepo {
     languageId: string
     isPublic?: boolean
   }): Promise<GetProductDetailResType | null> {
-    let  where: ProductWhereUniqueInput = {
+    let where: ProductWhereUniqueInput = {
       id: productId,
-      deletedAt: null
+      deletedAt: null,
     }
 
-    if(isPublic === true){
+    if (isPublic === true) {
       where.publishedAt = {
-        lte: new Date(), 
-        not: null
+        lte: new Date(),
+        not: null,
       }
-    } else if(isPublic === false){
+    } else if (isPublic === false) {
       where = {
         ...where,
-        OR: [
-          { publishedAt: null},
-          { publishedAt: {gt: new Date()}}
-        ]
+        OR: [{ publishedAt: null }, { publishedAt: { gt: new Date() } }],
       }
     }
 
@@ -385,12 +383,12 @@ export class productRepo {
     const now = new Date()
 
     if (isHard) {
-       return this.prisma.product.delete({
-          where: {
-            id,
-            deletedAt: null,
-          },
-        })
+      return this.prisma.product.delete({
+        where: {
+          id,
+          deletedAt: null,
+        },
+      })
     } else {
       const [product] = await Promise.all([
         this.prisma.product.update({

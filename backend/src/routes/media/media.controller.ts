@@ -1,11 +1,11 @@
 import { Controller, Get, NotFoundException, Param, Post, Res, UploadedFiles, UseInterceptors } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
-import 'multer'
-import { envConfig } from '../../shared/config/validate'
-import { IsPublic } from '../../shared/decorators/auth.decorator'
-import path from 'path'
-import { UPLOAD_DIR } from '../../shared/constants/other.constant'
 import type { Response } from 'express'
+import 'multer'
+import path from 'path'
+import { envConfig } from '../../shared/config/validate'
+import { UPLOAD_DIR } from '../../shared/constants/other.constant'
+import { IsPublic } from '../../shared/decorators/auth.decorator'
 
 @Controller('media')
 export class MediaController {

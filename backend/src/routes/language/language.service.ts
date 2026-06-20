@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { LanguageRepo } from './language.repo'
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
 import {
   LanguageAlreadyExistsException,
   LanguageNotFoundRecordException,
   LanguageValidationNotEmptyException,
 } from './error.model'
 import { CreateLanguageBodyType, UpdateLanguageBodyType } from './language.model'
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/client'
+import { LanguageRepo } from './language.repo'
 
 @Injectable()
 export class LanguageService {

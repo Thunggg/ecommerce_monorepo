@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { PermissionRepo } from './permission.repo'
-import { CreatePermissionBodyType, GetPermissionsQueryType, UpdatePermissionBodyType } from './permission.model'
-import { NotFoundPermissionException, PermissionAlreadyExistException } from './permission.error'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
+import { NotFoundPermissionException, PermissionAlreadyExistException } from './permission.error'
+import { CreatePermissionBodyType, GetPermissionsQueryType, UpdatePermissionBodyType } from './permission.model'
+import { PermissionRepo } from './permission.repo'
 
 @Injectable()
 export class PermissionService {

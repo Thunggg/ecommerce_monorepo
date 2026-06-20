@@ -1,9 +1,9 @@
 import { z } from 'zod'
+import { OrderBy, SortBy } from '../../shared/constants/other.constant'
 import { BrandIncludeTranslationSchema } from '../../shared/models/shared-brand.model'
 import { CategoryIncludeTranslationSchema } from '../../shared/models/shared-category.model'
 import { ProductTranslationSchema } from './product-traslation/product-translation.model'
 import { SKUSchema, UpsertSKUBodySchema } from './sku.model'
-import { OrderBy, SortBy } from '../../shared/constants/other.constant'
 
 type Variant = {
   value: string
@@ -125,7 +125,7 @@ export const GetProductsQuerySchema = z.object({
 // Dành cho admin và seller
 export const GetManageProductsQuerySchema = GetProductsQuerySchema.extend({
   isPublic: z.preprocess((value) => value === 'true', z.boolean()).optional(),
-  createdById: z.coerce.number().int().positive().optional()
+  createdById: z.coerce.number().int().positive().optional(),
 })
 
 export const GetProductsResSchema = z.object({

@@ -1,9 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { I18nContext } from 'nestjs-i18n'
+import { RoleName } from '../../shared/constants/role.constant'
 import { isNotFoundPrismaError, NotFoundRecordException } from '../../shared/helper/error'
 import { CreateProductBodyType, GetManageProductsQueryType, UpdateProductBodyType } from './product.model'
 import { productRepo } from './product.repo'
-import { RoleName } from '../../shared/constants/role.constant'
 
 @Injectable()
 export class ManageProductService {
@@ -13,7 +13,7 @@ export class ManageProductService {
   validatePrivilege({
     userIdRequest,
     roleNameRequest,
-    createdById
+    createdById,
   }: {
     userIdRequest: number
     roleNameRequest: string
@@ -27,8 +27,7 @@ export class ManageProductService {
   }
 
   // Xem danh sách sản phẩm của 1 shop, bắt buộc phải truyền query param là 'createdById'
-  async list(props: {query: GetManageProductsQueryType, userIdRequest: number, roleNameRequest: string}) {
-
+  async list(props: { query: GetManageProductsQueryType; userIdRequest: number; roleNameRequest: string }) {
     this.validatePrivilege({
       userIdRequest: props.userIdRequest,
       roleNameRequest: props.roleNameRequest,
@@ -52,10 +51,10 @@ export class ManageProductService {
     return data
   }
 
-  async getDetail(props: {productId: number, userIdRequest: number, roleNameRequest: string}) {
+  async getDetail(props: { productId: number; userIdRequest: number; roleNameRequest: string }) {
     const product = await this.productRepo.getDetail({
       productId: props.productId,
-      languageId: I18nContext.current()?.lang as string
+      languageId: I18nContext.current()?.lang as string,
     })
     if (!product) {
       throw NotFoundRecordException
@@ -77,9 +76,18 @@ export class ManageProductService {
     })
   }
 
-  async update({ productId, data, updatedById, roleNameRequest }: { productId: number; data: UpdateProductBodyType; updatedById: number, roleNameRequest: string }) {
-    
-    const product = await this.productRepo.findById({productId})
+  async update({
+    productId,
+    data,
+    updatedById,
+    roleNameRequest,
+  }: {
+    productId: number
+    data: UpdateProductBodyType
+    updatedById: number
+    roleNameRequest: string
+  }) {
+    const product = await this.productRepo.findById({ productId })
     if (!product) {
       throw NotFoundRecordException
     }
@@ -106,9 +114,16 @@ export class ManageProductService {
     }
   }
 
-  async delete({ productId, deletedById, roleNameRequest }: { productId: number; deletedById: number, roleNameRequest: string }) {
-
-    const product = await this.productRepo.findById({productId})
+  async delete({
+    productId,
+    deletedById,
+    roleNameRequest,
+  }: {
+    productId: number
+    deletedById: number
+    roleNameRequest: string
+  }) {
+    const product = await this.productRepo.findById({ productId })
     if (!product) {
       throw NotFoundRecordException
     }

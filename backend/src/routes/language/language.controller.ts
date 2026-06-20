@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import { LanguageService } from './language.service'
 import { ZodSerializerDto } from 'nestjs-zod'
+import { ActiveUser } from '../../shared/decorators/active-user.decorator'
+import { MessageResDTO } from '../../shared/dtos/response.dto'
 import {
   CreateLanguageBodyDTO,
   GetLanguageDetailResDTO,
@@ -8,8 +9,7 @@ import {
   GetLanguagesResDTO,
   UpdateLanguageBodyDTO,
 } from './language.dto'
-import { ActiveUser } from '../../shared/decorators/active-user.decorator'
-import { MessageResDTO } from '../../shared/dtos/response.dto'
+import { LanguageService } from './language.service'
 
 @Controller('language')
 export class LanguageController {
