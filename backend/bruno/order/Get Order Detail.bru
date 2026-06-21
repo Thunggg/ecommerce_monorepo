@@ -1,0 +1,19 @@
+meta {
+  name: Get Order Detail
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/orders/1
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

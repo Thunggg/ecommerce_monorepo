@@ -1,0 +1,33 @@
+meta {
+  name: Create Order
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  [
+    {
+      "shopId": 2,
+      "receiver": {
+        "name": "Nguyễn Văn A",
+        "phone": "0123456789",
+        "address": "123 Đường ABC, Quận 1, TP.HCM"
+      },
+      "cartItemIds": [8, 4, 3, 2]
+    }
+  ]
+}
