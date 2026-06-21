@@ -8,7 +8,7 @@ import {
   GetOrderDetailResType,
   GetOrderListResType,
 } from './order.model'
-import { OrderStatus, Prisma } from '../../generated/prisma/client'
+import { OrderStatus, PaymentStatus, Prisma } from '../../generated/prisma/client'
 import {
   CannotCancelOrderException,
   NotFoundCartItemException,
@@ -137,16 +137,21 @@ export class OrderRepo {
 
     // 5. Tạo order và xóa cartItem trong transaction để đảm bảo tính toàn vẹn dữ liệu
     const orders = await this.prisma.$transaction(async (tx) => {
-      const orders = await Promise.all(
+      const payment = await this.prisma.payment.create({
+        data: {
+          status: PaymentStatus.PENDING,
+        },
+      })
+      const orders$ = Promise.all(
         body.map((item) =>
           tx.order.create({
             data: {
-              paymentId: userId,
               userId,
               status: OrderStatus.PENDING_PAYMENT,
               receiver: item.receiver,
               createdById: userId,
               shopId: item.shopId,
+              paymentId: payment.id,
               items: {
                 create: item.cartItemIds.map((cartItemId) => {
                   const cartItem = cartItemMap.get(cartItemId)!
@@ -180,15 +185,28 @@ export class OrderRepo {
         ),
       )
 
-      await tx.cartItem.deleteMany({
+      const cartItem$ = tx.cartItem.deleteMany({
         where: {
           id: {
             in: allBodyCartitemIds,
           },
         },
       })
+
+      const sku$ = Promise.all(
+        cartItems.map((item) =>
+          tx.sKU.update({
+            where: { id: item.sku.id },
+            data: { stock: { decrement: item.quantity } },
+          }),
+        ),
+      )
+
+      const [orders] = await Promise.all([orders$, cartItem$, sku$])
+
       return orders
     })
+
     return {
       data: orders,
     }

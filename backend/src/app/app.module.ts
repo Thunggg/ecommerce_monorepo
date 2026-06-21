@@ -24,6 +24,7 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { CartModule } from '../routes/cart/cart.module'
 import { OrderModule } from '../routes/order/order.module'
+import { PaymentModule } from '../routes/payment/payment.module'
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { OrderModule } from '../routes/order/order.module'
     ProductTranslationModule,
     CartModule,
     OrderModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
