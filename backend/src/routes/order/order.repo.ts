@@ -1,14 +1,23 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../shared/services/prisma.service'
 import { OrderStatusType } from '../../shared/constants/oder.constant'
-import { CreateOrderBodyType, CreateOrderResType, GetOrderListResType } from './order.model'
+import {
+  CancelOrderResType,
+  CreateOrderBodyType,
+  CreateOrderResType,
+  GetOrderDetailResType,
+  GetOrderListResType,
+} from './order.model'
 import { OrderStatus, Prisma } from '../../generated/prisma/client'
 import {
+  CannotCancelOrderException,
   NotFoundCartItemException,
+  OrderNotFoundException,
   OutOfStockSKUException,
   ProductNotFoundException,
   SKUNotBelongToShopException,
 } from './order.error'
+import { isNotFoundPrismaError } from '../../shared/helper/error'
 
 @Injectable()
 export class OrderRepo {
@@ -182,6 +191,61 @@ export class OrderRepo {
     })
     return {
       data: orders,
+    }
+  }
+
+  async detail(userId: number, orderId: number): Promise<GetOrderDetailResType> {
+    const order = await this.prisma.order.findUnique({
+      where: {
+        id: orderId,
+        userId,
+        deletedAt: null,
+      },
+      include: {
+        items: true,
+      },
+    })
+
+    if (!order) {
+      throw OrderNotFoundException
+    }
+
+    return order
+  }
+
+  async cancel(userId: number, orderId: number): Promise<CancelOrderResType> {
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: {
+          id: orderId,
+          userId,
+          deletedAt: null,
+        },
+      })
+
+      if (order?.status !== OrderStatus.PENDING_PAYMENT) {
+        throw CannotCancelOrderException
+      }
+
+      const updatedOrder = await this.prisma.order.update({
+        where: {
+          id: orderId,
+          userId,
+          deletedAt: null,
+        },
+        data: {
+          status: OrderStatus.CANCELLED,
+          updatedById: userId,
+        },
+      })
+
+      return updatedOrder
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw OrderNotFoundException
+      }
+
+      throw error
     }
   }
 }
