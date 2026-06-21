@@ -8,7 +8,7 @@ declare global {
     // Define a type for a user's profile information.
     type Variants = VariantsType
 
-    type ProductTranslations = Pick<ProductTranslationType, 'id' | 'name' | 'description' | 'languageId'>
+    type ProductTranslations = Pick<ProductTranslationType, 'id' | 'name' | 'description' | 'languageId'>[]
 
     type Receiver = {
       name: string

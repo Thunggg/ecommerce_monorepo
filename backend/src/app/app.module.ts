@@ -23,6 +23,7 @@ import { SharedModule } from '../shared/shared.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { CartModule } from '../routes/cart/cart.module'
+import { OrderModule } from '../routes/order/order.module'
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { CartModule } from '../routes/cart/cart.module'
     ProductModule,
     ProductTranslationModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
