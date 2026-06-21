@@ -8,7 +8,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string(),
   OTP_EXPIRES_IN: z.string(),
   RESEND_API_KEY: z.string(),
-  SECRET_KEY: z.string(),
+  PAYMENT_API_KEY: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIRECT_URI: z.string(),

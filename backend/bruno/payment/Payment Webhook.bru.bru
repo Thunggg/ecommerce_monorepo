@@ -7,11 +7,17 @@ meta {
 post {
   url: {{baseUrl}}/payment/receiver
   body: json
-  auth: none
+  auth: apikey
 }
 
 headers {
   Content-Type: application/json
+}
+
+auth:apikey {
+  key: payment-api-key
+  value: {{paymentApiKey}}
+  placement: header
 }
 
 body:json {

@@ -8,10 +8,10 @@ import { envConfig } from './config/validate'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthenticationGuard } from './guards/authentication.guard'
 import { AccessTokenGuard } from './guards/access-token.guard'
-import { APIKeyGuard } from './guards/api-key.guard'
 import { TwoFactorAuthService } from './services/2fa.service'
 import { SharedUserRepository } from './repositories/shared-user.repo'
 import { SharedRoleRepository } from './repositories/shared-role.repo'
+import { PaymentAPIKeyGuard } from './guards/payment-api-key.guard'
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { SharedRoleRepository } from './repositories/shared-role.repo'
     EmailService,
     TokenService,
     AccessTokenGuard,
-    APIKeyGuard,
+    PaymentAPIKeyGuard,
     TwoFactorAuthService,
     SharedUserRepository,
     SharedRoleRepository,

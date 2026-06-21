@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core'
 import { AUTH_TYPE_KEY, AuthMetadata } from '../decorators/auth.decorator'
 import { AuthType, AuthTypeType, ConditionGuard } from '../constants/auth.constant'
 import { AccessTokenGuard } from './access-token.guard'
-import { APIKeyGuard } from './api-key.guard'
+import { PaymentAPIKeyGuard } from './payment-api-key.guard'
 
 const DEFAULT_AUTH_METADATA: AuthMetadata = {
   authTypes: [AuthType.Bearer],
@@ -19,7 +19,7 @@ export class AuthenticationGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly accessTokenGuard: AccessTokenGuard,
-    private readonly apiKeyGuard: APIKeyGuard,
+    private readonly apiKeyGuard: PaymentAPIKeyGuard,
   ) {
     this.guardMap = {
       [AuthType.APIKey]: this.apiKeyGuard,
