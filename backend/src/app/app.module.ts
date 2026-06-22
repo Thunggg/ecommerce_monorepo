@@ -1,3 +1,4 @@
+import { BullModule } from '@nestjs/bullmq'
 import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { I18nModule } from 'nestjs-i18n'
@@ -6,10 +7,13 @@ import * as path from 'path'
 import { AuthModule } from '../routes/auth/auth.module'
 import { BrandTranslationModule } from '../routes/brand/brand-translation/brand-translation.module'
 import { BrandModule } from '../routes/brand/brand.module'
+import { CartModule } from '../routes/cart/cart.module'
 import { CategoryTranslationModule } from '../routes/category/category-translation/category-translation.module'
 import { CategoryModule } from '../routes/category/category.module'
 import { LanguageModule } from '../routes/language/language.module'
 import { UploadModule } from '../routes/media/media.module'
+import { OrderModule } from '../routes/order/order.module'
+import { PaymentModule } from '../routes/payment/payment.module'
 import { PermissionModule } from '../routes/permission/permission.module'
 import { ProductTranslationModule } from '../routes/product/product-traslation/product-translation.module'
 import { ProductModule } from '../routes/product/product.module'
@@ -22,12 +26,19 @@ import { MyZodValidationPipe } from '../shared/pipes/custom-zod-validation.pipes
 import { SharedModule } from '../shared/shared.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { CartModule } from '../routes/cart/cart.module'
-import { OrderModule } from '../routes/order/order.module'
-import { PaymentModule } from '../routes/payment/payment.module'
+import { PaymentConsumer } from '../queues/payment.queue'
+import { envConfig } from '../shared/config/validate'
 
 @Module({
   imports: [
+    BullModule.forRoot({
+      connection: {
+        host: envConfig.REDIS_HOST,
+        port: Number(envConfig.REDIS_PORT),
+        username: envConfig.REDIS_USERNAME,
+        password: envConfig.REDIS_PASSWORD,
+      },
+    }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
@@ -69,6 +80,7 @@ import { PaymentModule } from '../routes/payment/payment.module'
       provide: APP_INTERCEPTOR,
       useClass: ZodSerializerInterceptor,
     },
+    PaymentConsumer,
   ],
 })
 export class AppModule {}

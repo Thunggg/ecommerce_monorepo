@@ -16,6 +16,10 @@ const envSchema = z.object({
   APP_NAME: z.string(),
   UPLOAD_DIR: z.string(),
   PREFIX_STATIC_ENDPOINT: z.string(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.string(),
+  REDIS_USERNAME: z.string(),
+  REDIS_PASSWORD: z.string(),
 })
 
 const envParsed = envSchema.safeParse(process.env)

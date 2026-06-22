@@ -1,9 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common'
-import { PaymentService } from './payment.service'
 import { ZodSerializerDto } from 'nestjs-zod'
-import { Auth, IsPublic } from '../../shared/decorators/auth.decorator'
-import { WebhookPaymentBodyDTO } from './payment.dto'
+import { Auth } from '../../shared/decorators/auth.decorator'
 import { MessageResDTO } from '../category/category-translation/category-translation.dto'
+import { WebhookPaymentBodyDTO } from './payment.dto'
+import { PaymentService } from './payment.service'
 
 @Controller('payment')
 export class PaymentController {
