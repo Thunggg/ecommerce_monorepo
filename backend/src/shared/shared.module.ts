@@ -46,6 +46,7 @@ import { SharedPaymentRepository } from './repositories/shared-payment.repo'
     TwoFactorAuthService,
     SharedUserRepository,
     SharedRoleRepository,
+    SharedPaymentRepository,
   ],
 })
 export class SharedModule {}
