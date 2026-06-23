@@ -3,19 +3,14 @@ import { OrderRepo } from './order.repo'
 import {
   CancelOrderResType,
   CreateOrderBodyType,
-  CreateOrderResType,
   GetOrderDetailResType,
   GetOrderListQueryType,
   GetOrderListResType,
 } from './order.model'
-import { OrderProducer } from './order.producer'
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private readonly orderRepo: OrderRepo,
-    private readonly orderProducer: OrderProducer,
-  ) {}
+  constructor(private readonly orderRepo: OrderRepo) {}
 
   async list({
     limit,
@@ -28,10 +23,9 @@ export class OrderService {
     return this.orderRepo.list({ limit, page, userId, status })
   }
 
-  async create(userId: number, body: CreateOrderBodyType): Promise<CreateOrderResType> {
+  async create(userId: number, body: CreateOrderBodyType) {
     const result = await this.orderRepo.create(userId, body)
-    await this.orderProducer.addCancelPaymentJob(result.paymentId)
-    return { data: result.orders }
+    return result
   }
 
   async detail(userId: number, orderId: number): Promise<GetOrderDetailResType> {

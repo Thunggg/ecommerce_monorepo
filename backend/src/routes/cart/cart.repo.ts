@@ -3,7 +3,6 @@ import { PrismaService } from '../../shared/services/prisma.service'
 import { SKUSchemaType } from '../../shared/models/shared-sku.model'
 import {
   InvalidQuantityException,
-  NotFoundCartItemException,
   NotFoundSKUException,
   OutOfStockSKUException,
   ProductNotFoundException,

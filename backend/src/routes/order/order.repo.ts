@@ -18,10 +18,14 @@ import {
   SKUNotBelongToShopException,
 } from './order.error'
 import { isNotFoundPrismaError } from '../../shared/helper/error'
+import { OrderProducer } from './order.producer'
 
 @Injectable()
 export class OrderRepo {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly orderProducer: OrderProducer,
+  ) {}
 
   async list({
     limit,
@@ -205,7 +209,9 @@ export class OrderRepo {
         ),
       )
 
-      const [orders] = await Promise.all([orders$, cartItem$, sku$])
+      const addCancelPaymentjob$ = await this.orderProducer.addCancelPaymentJob(payment.id)
+
+      const [orders] = await Promise.all([orders$, cartItem$, sku$, addCancelPaymentjob$])
 
       return [payment.id, orders]
     })
