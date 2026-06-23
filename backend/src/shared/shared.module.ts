@@ -12,6 +12,7 @@ import { TwoFactorAuthService } from './services/2fa.service'
 import { SharedUserRepository } from './repositories/shared-user.repo'
 import { SharedRoleRepository } from './repositories/shared-role.repo'
 import { PaymentAPIKeyGuard } from './guards/payment-api-key.guard'
+import { SharedPaymentRepository } from './repositories/shared-payment.repo'
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PaymentAPIKeyGuard } from './guards/payment-api-key.guard'
     TwoFactorAuthService,
     SharedUserRepository,
     SharedRoleRepository,
+    SharedPaymentRepository,
   ],
   exports: [
     PrismaService,
